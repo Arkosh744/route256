@@ -13,7 +13,7 @@ const (
 	clientTimeout = 10 * time.Second
 )
 
-func Do[Req any, Res any](ctx context.Context, req *Req, method, path string) (*Res, error) {
+func Do[Req, Res any](ctx context.Context, req *Req, method, path string) (*Res, error) {
 	rawData, err := json.Marshal(&req)
 	if err != nil {
 		return nil, fmt.Errorf("encode request: %w", err)

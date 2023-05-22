@@ -1,5 +1,5 @@
 lint:
-	gofumpt -l -w .
+	gofumpt -w -extra .
 	golangci-lint run checkout/... loms/... notifications/... libs/... --fix
 
 build-all:
