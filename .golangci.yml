@@ -1,0 +1,123 @@
+linters-settings:
+  dupl:
+    threshold: 100
+  funlen:
+    lines: 100
+    statements: 60
+  goconst:
+    min-len: 2
+    min-occurrences: 2
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - experimental
+      - opinionated
+      - performance
+      - style
+    settings:
+      hugeParam:
+        sizeThreshold: 200
+  gocyclo:
+    min-complexity: 20
+  cyclop:
+    max-complexity: 20
+  goimports:
+    local-prefixes: github.com/golangci/golangci-lint
+  golint:
+    min-confidence: 0
+  govet:
+    check-shadowing: true
+  lll:
+    line-length: 140
+  maligned:
+    suggest-new: true
+  misspell:
+    locale: US
+  nakedret:
+    max-func-lines: 0
+  nestif:
+    min-complexity: 10
+  tagliatelle:
+    case:
+      rules:
+        json: snake
+  exhaustive:
+      check-generated: false
+      default-signifies-exhaustive: true
+      package-scope-only: false
+  varnamelen:
+    ignore-names:
+      - err
+      - i
+      - j
+      - pi
+      - id
+      - t
+      - err
+      - ok
+      - s3
+      - ctx
+      - tx
+      - wg
+      - cfg
+      - db
+      - r # request
+      - w # writer
+      - tc
+      - ip
+      - f # test function
+
+linters:
+  enable-all: true
+  disable:
+    - varcheck # is deprecated
+    - deadcode # is deprecated
+    - ifshort # is deprecated
+    - nosnakecase # is deprecated
+    - structcheck # is deprecated
+    - rowserrcheck # is disabled because of generics
+    - structcheck # is disabled because of generics
+    - wastedassign # is disabled because of generics
+
+    - gomnd
+    - revive
+    - varnamelen
+    - ireturn
+    - goerr113
+    - typecheck
+    - maintidx
+    - forcetypeassert
+    - errchkjson
+    - interfacebloat
+    - nonamedreturns
+    - gochecknoglobals
+    - usestdlibvars
+    - wrapcheck
+    - goconst
+    - dupword
+    - musttag
+    - exhaustivestruct
+    - exhaustive
+    - exhaustruct
+    - gci # Conflicts with gofumpt
+    - golint # Deprecated
+    - interfacer # Deprecated
+    - maligned # Deprecated
+    - paralleltest
+    - promlinter
+    - scopelint # Deprecated
+    - testpackage
+
+run:
+  timeout: 10m
+  build-tags:
+    - test
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - gomnd
+        - funlen
+        - gosec
+        - exhaustivestruct

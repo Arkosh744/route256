@@ -5,7 +5,7 @@ const (
 	OrderStatusAwaitingPayment = "awaiting_payment"
 	OrderStatusFailed          = "failed"
 	OrderStatusPaid            = "paid"
-	OrderStatusCancelled       = "cancelled"
+	OrderStatusCanceled        = "canceled"
 )
 
 type Order struct {

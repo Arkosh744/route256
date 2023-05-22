@@ -1,10 +1,5 @@
-token: "testtoken"
 host: "0.0.0.0"
-port: 8080
-
-services:
-  loms: "http://loms:8081"
-  product_service: "http://route256.pavl.uk:8080"
+port: 8081
 
 log:
   preset: "dev"

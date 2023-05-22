@@ -38,8 +38,7 @@ func Do[Req any, Res any](ctx context.Context, req *Req, method, path string) (*
 	}
 
 	var res Res
-	err = json.NewDecoder(httpResponse.Body).Decode(&res)
-	if err != nil {
+	if err = json.NewDecoder(httpResponse.Body).Decode(&res); err != nil {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 

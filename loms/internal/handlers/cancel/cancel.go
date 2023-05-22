@@ -11,9 +11,9 @@ type Handler struct {
 	service service.Service
 }
 
-func NewHandler(service service.Service) *Handler {
+func NewHandler(serv service.Service) *Handler {
 	return &Handler{
-		service: service,
+		service: serv,
 	}
 }
 
@@ -21,8 +21,7 @@ type Request struct {
 	User int64 `json:"user"`
 }
 
-type Response struct {
-}
+type Response struct{}
 
 func (r Request) Validate() error {
 	if r.User == 0 {

@@ -2,11 +2,12 @@ package log
 
 import (
 	"context"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 	l "log"
 	"route256/loms/internal/config"
 	"time"
+
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 var log *zap.SugaredLogger
@@ -28,9 +29,6 @@ func InitLogger(_ context.Context) error {
 }
 
 func selectLogger() (*zap.Logger, error) {
-	var logger *zap.Logger
-	var err error
-
 	encoderConfig := zapcore.EncoderConfig{
 		TimeKey:        "time",
 		LevelKey:       "level",
@@ -45,24 +43,28 @@ func selectLogger() (*zap.Logger, error) {
 		EncodeCaller:   zapcore.ShortCallerEncoder,
 	}
 
-	var cfg zap.Config
-	switch config.AppConfig.Log.Preset {
-	case productionPreset:
-		cfg = zap.NewProductionConfig()
-	case devPreset:
-		cfg = zap.NewDevelopmentConfig()
-	default:
-		l.Println("unknown logger preset, using development preset")
-		cfg = zap.NewDevelopmentConfig()
-	}
-
+	cfg := getConfig()
 	cfg.EncoderConfig = encoderConfig
-	logger, err = cfg.Build()
+
+	logger, err := cfg.Build()
 	if err != nil {
 		return nil, err
 	}
 
 	return logger, nil
+}
+
+func getConfig() zap.Config {
+	switch config.AppConfig.Log.Preset {
+	case productionPreset:
+		return zap.NewProductionConfig()
+	case devPreset:
+		return zap.NewDevelopmentConfig()
+	default:
+		l.Println("unknown logger preset, using development preset")
+
+		return zap.NewDevelopmentConfig()
+	}
 }
 
 func customTimeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {

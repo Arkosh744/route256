@@ -10,19 +10,19 @@ import (
 	"route256/libs/wrappers"
 )
 
-func InitRouter(service service.Service) *http.ServeMux {
+func InitRouter(serv service.Service) *http.ServeMux {
 	mux := http.NewServeMux()
 
-	addToCart := add.NewHandler(service).Handle
+	addToCart := add.NewHandler(serv).Handle
 	mux.Handle("/addToCart", wrappers.New(addToCart))
 
-	deleteFromCart := del.NewHandler(service).Handle
+	deleteFromCart := del.NewHandler(serv).Handle
 	mux.Handle("/deleteFromCart", wrappers.New(deleteFromCart))
 
-	listCart := get.NewHandler(service).Handle
+	listCart := get.NewHandler(serv).Handle
 	mux.Handle("/listCart", wrappers.New(listCart))
 
-	buy := purchase.NewHandler(service).Handle
+	buy := purchase.NewHandler(serv).Handle
 	mux.Handle("/purchase", wrappers.New(buy))
 
 	return mux

@@ -5,8 +5,17 @@ type ItemBase struct {
 	Price uint32
 }
 
-type ItemInfo struct {
-	ItemBase
+type ItemData struct {
 	SKU   uint32
 	Count uint32
+}
+
+type ItemInfo struct {
+	ItemBase
+	ItemData
+}
+
+type CartInfo struct {
+	Items      []ItemInfo `json:"items"`
+	TotalPrice uint32     `json:"total_price"`
 }

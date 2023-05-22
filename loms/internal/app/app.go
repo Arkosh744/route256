@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"net/http"
 	"route256/loms/internal/config"
@@ -70,10 +71,10 @@ func (app *App) initHTTPServer(ctx context.Context) error {
 }
 
 func (app *App) RunHTTPServer() error {
-	log.Infof("Start: HTTP server listening on port %s", config.AppConfig.Port)
-	err := app.httpServer.ListenAndServe()
-	if err != nil {
-		return err
+	log.Infof("Starting: HTTP server listening on port %s", config.AppConfig.Port)
+
+	if err := app.httpServer.ListenAndServe(); err != nil {
+		return fmt.Errorf("failed starting http server: %w", err)
 	}
 
 	return nil

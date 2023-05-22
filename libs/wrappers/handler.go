@@ -29,6 +29,7 @@ func (w *Wrapper[Req, Res]) ServeHTTP(resWriter http.ResponseWriter, httpReq *ht
 	if err != nil {
 		resWriter.WriteHeader(http.StatusInternalServerError)
 		writeErrorText(resWriter, "parse request", err)
+
 		return
 	}
 
@@ -36,6 +37,7 @@ func (w *Wrapper[Req, Res]) ServeHTTP(resWriter http.ResponseWriter, httpReq *ht
 	if errValidation != nil {
 		resWriter.WriteHeader(http.StatusBadRequest)
 		writeErrorText(resWriter, "bad request", errValidation)
+
 		return
 	}
 
@@ -44,6 +46,7 @@ func (w *Wrapper[Req, Res]) ServeHTTP(resWriter http.ResponseWriter, httpReq *ht
 		log.Printf("executor fail: %s", err)
 		resWriter.WriteHeader(http.StatusInternalServerError)
 		writeErrorText(resWriter, "exec handler", err)
+
 		return
 	}
 
@@ -51,6 +54,7 @@ func (w *Wrapper[Req, Res]) ServeHTTP(resWriter http.ResponseWriter, httpReq *ht
 	if err != nil {
 		resWriter.WriteHeader(http.StatusInternalServerError)
 		writeErrorText(resWriter, "decode response", err)
+
 		return
 	}
 
@@ -65,5 +69,5 @@ func writeErrorText(w http.ResponseWriter, text string, err error) {
 	buf.WriteString(err.Error())
 	buf.WriteByte('\n')
 
-	w.Write(buf.Bytes())
+	_, _ = w.Write(buf.Bytes())
 }

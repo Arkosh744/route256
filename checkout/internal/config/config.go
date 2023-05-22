@@ -3,8 +3,9 @@ package config
 import (
 	"context"
 	"fmt"
-	"gopkg.in/yaml.v3"
 	"os"
+
+	"gopkg.in/yaml.v3"
 )
 
 const pathToConfig = "config.yaml"
@@ -16,7 +17,7 @@ type Config struct {
 
 	Services struct {
 		Loms           string `yaml:"loms"`
-		ProductService string `yaml:"product_service"`
+		ProductService string `yaml:"productService"`
 	} `yaml:"services"`
 
 	Log struct {

@@ -27,14 +27,15 @@ type ItemsRequest struct {
 	SKU   uint32 `json:"sku"`
 }
 
-func New(clientUrl string) *client {
-	stockUrl, _ := url.JoinPath(clientUrl, getProductPath)
+func New(clientURL string) *client {
+	stockURL, _ := url.JoinPath(clientURL, getProductPath)
 
-	return &client{pathStock: stockUrl}
+	return &client{pathStock: stockURL}
 }
 
 func (c *client) GetProduct(ctx context.Context, sku uint32) (*models.ItemBase, error) {
 	req := ItemsRequest{Token: config.AppConfig.Token, SKU: sku}
+
 	res, err := wrappers.Do[ItemsRequest, models.ItemBase](ctx, &req, http.MethodPost, c.pathStock)
 	if err != nil {
 		return nil, fmt.Errorf(`do request "%s": %w`, c.pathStock, err)

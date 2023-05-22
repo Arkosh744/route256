@@ -17,11 +17,4 @@ func main() {
 	if err = a.Run(); err != nil {
 		log.Fatalf("failed to run app: %v", err)
 	}
-
-	//hand := &stocks.Handler{}
-	//http.Handle("/stocks", wrappers.New(hand.Handle))
-	//err := http.ListenAndServe(port, nil)
-	//if err != nil {
-	//	log.Fatalln("ERR: ", err)
-	//}
 }

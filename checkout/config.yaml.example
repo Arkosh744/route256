@@ -4,7 +4,7 @@ port: 8080
 
 services:
   loms: "http://loms:8081"
-  product_service: "http://route256.pavl.uk:8080"
+  productService: "http://route256.pavl.uk:8080"
 
 log:
   preset: "dev"

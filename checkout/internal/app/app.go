@@ -59,11 +59,13 @@ func (app *App) initServiceProvider(ctx context.Context) error {
 }
 
 func (app *App) initHTTPServer(ctx context.Context) error {
+	const timeout = 15
+
 	app.httpServer = &http.Server{
 		Addr:         net.JoinHostPort(config.AppConfig.Host, config.AppConfig.Port),
 		Handler:      handlers.InitRouter(app.serviceProvider.cartService),
-		ReadTimeout:  15 * time.Second,
-		WriteTimeout: 15 * time.Second,
+		ReadTimeout:  timeout * time.Second,
+		WriteTimeout: timeout * time.Second,
 	}
 
 	return nil
@@ -71,8 +73,8 @@ func (app *App) initHTTPServer(ctx context.Context) error {
 
 func (app *App) RunHTTPServer() error {
 	log.Infof("Start: HTTP server listening on port %s", config.AppConfig.Port)
-	err := app.httpServer.ListenAndServe()
-	if err != nil {
+
+	if err := app.httpServer.ListenAndServe(); err != nil {
 		return err
 	}
 

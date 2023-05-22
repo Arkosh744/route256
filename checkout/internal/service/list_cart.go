@@ -16,7 +16,9 @@ func (s *cartService) ListCart(ctx context.Context, user int64) (*models.CartInf
 	counts := []uint32{1, 4, 2, 1}
 
 	items := make([]models.ItemInfo, 0, len(skus))
+
 	var totalPrice uint32
+
 	for i, sku := range skus {
 		res, err := s.psClient.GetProduct(ctx, sku)
 		if err != nil {
@@ -28,8 +30,10 @@ func (s *cartService) ListCart(ctx context.Context, user int64) (*models.CartInf
 				Name:  res.Name,
 				Price: res.Price,
 			},
-			SKU:   sku,
-			Count: counts[i],
+			ItemData: models.ItemData{
+				SKU:   sku,
+				Count: counts[i],
+			},
 		})
 
 		totalPrice += res.Price * counts[i]

@@ -3,23 +3,17 @@ package config
 import (
 	"context"
 	"fmt"
-	"gopkg.in/yaml.v3"
 	"os"
+
+	"gopkg.in/yaml.v3"
 )
 
 const pathToConfig = "config.yaml"
 
 type Config struct {
-	Token string `yaml:"token"`
-	Host  string `yaml:"host"`
-	Port  string `yaml:"port"`
-
-	Services struct {
-		Loms           string `yaml:"loms"`
-		ProductService string `yaml:"product_service"`
-	} `yaml:"services"`
-
-	Log struct {
+	Host string `yaml:"host"`
+	Port string `yaml:"port"`
+	Log  struct {
 		Preset string `yaml:"preset"`
 	} `yaml:"log"`
 }

@@ -1,10 +1,8 @@
 package cart
 
-type Repository interface {
-}
+type Repository interface{}
 
-type repository struct {
-}
+type repository struct{}
 
 func NewRepo() *repository {
 	return &repository{}

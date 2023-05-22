@@ -10,14 +10,10 @@ type Handler struct {
 	service service.Service
 }
 
-func NewHandler(service service.Service) *Handler {
+func NewHandler(s service.Service) *Handler {
 	return &Handler{
-		service: service,
+		service: s,
 	}
-}
-
-type Response struct {
-	OrderID int64 `json:"order_id"`
 }
 
 type Request struct {
@@ -26,12 +22,17 @@ type Request struct {
 	Count uint16 `json:"count"`
 }
 
+type Response struct {
+	OrderID int64 `json:"order_id"`
+}
+
 func (r Request) Validate() error {
 	return nil
 }
 
 func (h *Handler) Handle(ctx context.Context, req Request) (Response, error) {
 	log.Infof("%+v", req)
+
 	orderID, err := h.service.Create(ctx, req.User, req.SKU, req.Count)
 	if err != nil {
 		return Response{}, err

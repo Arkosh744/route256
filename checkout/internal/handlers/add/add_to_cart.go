@@ -11,9 +11,9 @@ type Handler struct {
 	service service.Service
 }
 
-func NewHandler(service service.Service) *Handler {
+func NewHandler(s service.Service) *Handler {
 	return &Handler{
-		service: service,
+		service: s,
 	}
 }
 
@@ -23,8 +23,7 @@ type Request struct {
 	Count uint16 `json:"count"`
 }
 
-type Response struct {
-}
+type Response struct{}
 
 func (r Request) Validate() error {
 	if r.User == 0 {
@@ -40,5 +39,6 @@ func (h *Handler) Handle(ctx context.Context, req Request) (Response, error) {
 	log.Infof("%+v", req)
 
 	err := h.service.AddToCart(ctx, req.User, req.SKU, req.Count)
+
 	return Response{}, err
 }
