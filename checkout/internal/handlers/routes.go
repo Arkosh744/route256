@@ -14,16 +14,16 @@ func InitRouter(service service.Service) *http.ServeMux {
 	mux := http.NewServeMux()
 
 	addToCart := add.NewHandler(service).Handle
-	mux.Handle("/addToCart/", wrappers.New(addToCart))
+	mux.Handle("/addToCart", wrappers.New(addToCart))
 
 	deleteFromCart := del.NewHandler(service).Handle
-	mux.Handle("/deleteFromCart/", wrappers.New(deleteFromCart))
+	mux.Handle("/deleteFromCart", wrappers.New(deleteFromCart))
 
 	listCart := get.NewHandler(service).Handle
-	mux.Handle("/listCart/", wrappers.New(listCart))
+	mux.Handle("/listCart", wrappers.New(listCart))
 
 	buy := purchase.NewHandler(service).Handle
-	mux.Handle("/purchase/", wrappers.New(buy))
+	mux.Handle("/purchase", wrappers.New(buy))
 
 	return mux
 }

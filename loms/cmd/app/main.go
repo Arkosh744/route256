@@ -1,19 +1,27 @@
 package main
 
 import (
+	"context"
 	"log"
-	"net/http"
-	"route256/libs/wrappers"
-	"route256/loms/internal/handlers/stocks"
+	"route256/loms/internal/app"
 )
 
-const port = ":8081"
-
 func main() {
-	hand := &stocks.Handler{}
-	http.Handle("/stocks", wrappers.New(hand.Handle))
-	err := http.ListenAndServe(port, nil)
+	ctx := context.Background()
+
+	a, err := app.NewApp(ctx)
 	if err != nil {
-		log.Fatalln("ERR: ", err)
+		log.Fatalf("failed to initialize app: %v", err)
 	}
+
+	if err = a.Run(); err != nil {
+		log.Fatalf("failed to run app: %v", err)
+	}
+
+	//hand := &stocks.Handler{}
+	//http.Handle("/stocks", wrappers.New(hand.Handle))
+	//err := http.ListenAndServe(port, nil)
+	//if err != nil {
+	//	log.Fatalln("ERR: ", err)
+	//}
 }

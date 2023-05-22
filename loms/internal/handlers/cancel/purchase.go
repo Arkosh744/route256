@@ -1,18 +1,14 @@
-package stocks
+package cancel
 
 import (
 	"context"
+	"errors"
 	"route256/loms/internal/log"
-	"route256/loms/internal/models"
 	"route256/loms/internal/service"
 )
 
 type Handler struct {
 	service service.Service
-}
-
-type Response struct {
-	Stocks []models.StockItem `json:"stocks"`
 }
 
 func NewHandler(service service.Service) *Handler {
@@ -22,20 +18,29 @@ func NewHandler(service service.Service) *Handler {
 }
 
 type Request struct {
-	SKU uint32 `json:"sku"`
+	User int64 `json:"user"`
+}
+
+type Response struct {
 }
 
 func (r Request) Validate() error {
+	if r.User == 0 {
+		return ErrUserNotFound
+	}
+
 	return nil
 }
+
+var ErrUserNotFound = errors.New("user not found")
 
 func (h *Handler) Handle(ctx context.Context, req Request) (Response, error) {
 	log.Infof("%+v", req)
 
-	return Response{
-		Stocks: []models.StockItem{
-			{WarehouseID: 1, Count: 200},
-			{WarehouseID: 2131, Count: 3},
-		},
-	}, nil
+	err := h.service.Cancel(ctx, req.User)
+	if err != nil {
+		return Response{}, err
+	}
+
+	return Response{}, nil
 }

@@ -27,7 +27,7 @@ type StocksRequest struct {
 
 type StocksResponse struct {
 	Stocks []struct {
-		WarehouseID int64  `json:"warehouseID"`
+		WarehouseID int64  `json:"warehouse_id"`
 		Count       uint64 `json:"count"`
 	} `json:"stocks"`
 }
