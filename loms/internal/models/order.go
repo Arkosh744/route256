@@ -10,7 +10,7 @@ const (
 
 type Order struct {
 	Status string
-	UserID int64
+	User   int64
 	Items  []Item
 }
 
