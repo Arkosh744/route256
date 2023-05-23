@@ -35,14 +35,12 @@ func (app *App) Run() error {
 }
 
 func (app *App) initDeps(ctx context.Context) error {
-	inits := []func(context.Context) error{
+	for _, init := range []func(context.Context) error{
 		config.Init,
 		log.InitLogger,
 		app.initServiceProvider,
 		app.initHTTPServer,
-	}
-
-	for _, init := range inits {
+	} {
 		if err := init(ctx); err != nil {
 			return err
 		}
