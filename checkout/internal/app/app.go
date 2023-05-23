@@ -52,13 +52,12 @@ func (app *App) initDeps(ctx context.Context) error {
 }
 
 func (app *App) initServiceProvider(ctx context.Context) error {
-	app.serviceProvider = newServiceProvider()
-	app.serviceProvider.cartService = app.serviceProvider.GetCartService(ctx)
+	app.serviceProvider = newServiceProvider(ctx)
 
 	return nil
 }
 
-func (app *App) initHTTPServer(ctx context.Context) error {
+func (app *App) initHTTPServer(_ context.Context) error {
 	const timeout = 15
 
 	app.httpServer = &http.Server{

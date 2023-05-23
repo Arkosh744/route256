@@ -36,14 +36,12 @@ func (app *App) Run() error {
 }
 
 func (app *App) initDeps(ctx context.Context) error {
-	inits := []func(context.Context) error{
+	for _, init := range []func(context.Context) error{
 		config.Init,
 		log.InitLogger,
 		app.initServiceProvider,
 		app.initHTTPServer,
-	}
-
-	for _, init := range inits {
+	} {
 		if err := init(ctx); err != nil {
 			return err
 		}
@@ -53,13 +51,12 @@ func (app *App) initDeps(ctx context.Context) error {
 }
 
 func (app *App) initServiceProvider(ctx context.Context) error {
-	app.serviceProvider = newServiceProvider()
-	app.serviceProvider.service = app.serviceProvider.GetCartService(ctx)
+	app.serviceProvider = newServiceProvider(ctx)
 
 	return nil
 }
 
-func (app *App) initHTTPServer(ctx context.Context) error {
+func (app *App) initHTTPServer(_ context.Context) error {
 	app.httpServer = &http.Server{
 		Addr:         net.JoinHostPort(config.AppConfig.Host, config.AppConfig.Port),
 		Handler:      handlers.InitRouter(app.serviceProvider.service),

@@ -12,8 +12,11 @@ type serviceProvider struct {
 	repo cart.Repository
 }
 
-func newServiceProvider() *serviceProvider {
-	return &serviceProvider{}
+func newServiceProvider(ctx context.Context) *serviceProvider {
+	sp := &serviceProvider{}
+	sp.GetCartService(ctx)
+
+	return sp
 }
 
 func (s *serviceProvider) GetRepository(_ context.Context) cart.Repository {
