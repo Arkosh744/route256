@@ -1,3 +1,7 @@
+lint:
+	gofumpt -w -extra .
+	golangci-lint run checkout/... loms/... notifications/... libs/... --fix
+
 build-all:
 	cd checkout && GOOS=linux GOARCH=amd64 make build
 	cd loms && GOOS=linux GOARCH=amd64 make build
