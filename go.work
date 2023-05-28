@@ -4,5 +4,6 @@ use (
 	./checkout
 	./libs
 	./loms
+	./pkg
 	./notifications
 )

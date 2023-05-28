@@ -2,6 +2,8 @@ package app
 
 import (
 	"context"
+
+	checkoutV1 "route256/checkout/internal/api/checkout_v1"
 	"route256/checkout/internal/clients/loms"
 	"route256/checkout/internal/clients/ps"
 	"route256/checkout/internal/config"
@@ -13,15 +15,15 @@ type serviceProvider struct {
 	cartService service.Service
 
 	repo cart.Repository
+
+	cartImpl *checkoutV1.Implementation
+
 	loms loms.Client
 	ps   ps.Client
 }
 
-func newServiceProvider(ctx context.Context) *serviceProvider {
-	sp := &serviceProvider{}
-	sp.GetCartService(ctx)
-
-	return sp
+func newServiceProvider(_ context.Context) *serviceProvider {
+	return &serviceProvider{}
 }
 
 func (s *serviceProvider) GetCartRepo(_ context.Context) cart.Repository {
@@ -54,4 +56,12 @@ func (s *serviceProvider) GetCartService(ctx context.Context) service.Service {
 	}
 
 	return s.cartService
+}
+
+func (s *serviceProvider) GetCheckoutImpl(ctx context.Context) *checkoutV1.Implementation {
+	if s.cartImpl == nil {
+		s.cartImpl = checkoutV1.NewImplementation(s.GetCartService(ctx))
+	}
+
+	return s.cartImpl
 }
