@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package route256.checkout;
+
+import "google/protobuf/empty.proto";
+import "validate/validate.proto";
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+option go_package = "route256/product-service/pkg/checkout_v1";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+  info: {
+    title: "Checkout API";
+    version: "0.1";
+    contact: {
+      name: "Kirill";
+      url: "https://github.com/Arkosh744";
+    };
+  };
+  host: "localhost:8080";
+  schemes: HTTP;
+  schemes: HTTPS;
+  consumes: "application/json";
+  produces: "application/json";
+};
+
+service Checkout {
+  rpc AddToCart(CartRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/checkout/v1/addToCart";
+      body: "*";
+    };
+  };
+  rpc DeleteFromCart(CartRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/checkout/v1/deleteFromCart";
+    };
+  };
+  rpc ListCart(OrderIDRequest) returns (ListCartResponse) {
+    option (google.api.http) = {
+      get: "/checkout/v1/listCart";
+    };
+  };
+  rpc Purchase(OrderIDRequest) returns (OrderIDResponse) {
+    option (google.api.http) = {
+      post: "/checkout/v1/purchase";
+    };
+  };
+}
+
+message CartRequest {
+  int64 user = 1 [(validate.rules).int64.gt = 0];
+  uint32 sku = 2;
+  uint32 count = 3 [(validate.rules).uint32 = {gt: 0, lt: 65535}];
+}
+
+message OrderIDRequest {
+  int64 user = 1 [(validate.rules).int64.gt = 0];
+}
+
+message OrderIDResponse {
+  int64 order_id = 1 [(validate.rules).int64.gt = 0];
+}
+
+message ListCartResponse {
+  repeated CartItem items = 1;
+  uint32 TotalPrice = 2;
+}
+
+message CartItem {
+  uint32 sku = 1;
+  uint32 count = 2 [(validate.rules).uint32 = {gt: 0, lt: 65535}];
+  string name = 3;
+  uint32 price = 4;
+}

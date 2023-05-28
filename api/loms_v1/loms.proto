@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package route256.loms;
+
+import "google/protobuf/empty.proto";
+import "validate/validate.proto";
+
+option go_package = "route256/product-service/pkg/loms_v1";
+
+service Loms {
+  rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse);
+  rpc ListOrder(OrderIDRequest) returns (ListOrdersResponse);
+  rpc OrderPayed(OrderIDRequest) returns (google.protobuf.Empty);
+  rpc CancelOrder(OrderIDRequest) returns (google.protobuf.Empty);
+  rpc Stocks(StocksRequest) returns (StocksResponse);
+}
+
+message CreateOrderRequest {
+  int64 user = 1 [(validate.rules).int64.gt = 0];
+  repeated Item Item = 2;
+}
+
+message Item {
+  uint32 sku = 1;
+  uint32 count = 2 [(validate.rules).uint32 = {gt: 0, lt: 65535}];
+}
+
+message CreateOrderResponse {
+  int64 order_id = 1;
+}
+
+message ListOrdersResponse {
+  OrderStatus status = 1;
+  int64 user = 2;
+  repeated Item Item = 3;
+}
+
+enum OrderStatus {
+  NEW = 0;
+  AWAITING_PAYMENT = 1;
+  FAILED = 2;
+  PAID = 3;
+  CANCELLED = 4;
+}
+
+message StocksRequest {
+  uint32 sku = 1;
+}
+
+message StocksResponse {
+  repeated Stock stocks = 1;
+}
+
+message Stock {
+  int64 warehouseID = 1;
+  uint64 count = 2;
+}
+
+message OrderIDRequest {
+  int64 order_id = 1;
+}

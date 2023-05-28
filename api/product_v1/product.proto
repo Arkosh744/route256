@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package route256.product;
+
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+option go_package = "route256/product-service/pkg/product";
+
+message GetProductRequest {
+  string token = 1 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Токен для доступа, нужно получить в Телеграмме у преподавателя",
+      default: "testtoken"
+    }
+  ];
+
+  uint32 sku = 2 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Уникальный id товара", default: "773297411"}
+  ];
+}
+
+message GetProductResponse {
+  string name = 1;
+
+  uint32 price = 2;
+}
+
+message ListSkusRequest {
+  string token = 1 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Токен для доступа, нужно получить в Телеграмме у преподавателя",
+      default: "testtoken"
+    }
+  ];
+
+  uint32 start_after_sku = 2 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Начиная с какой sku выводить список (сама sku не включается в список)", default: "0"}
+  ];
+
+  uint32 count = 3 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Количество sku, которые надо вернуть",
+      default: "100"
+    }
+  ];
+}
+
+message ListSkusResponse {
+  repeated uint32 skus = 1;
+}
+
+service ProductService {
+  rpc GetProduct (GetProductRequest) returns (GetProductResponse) {
+    option (google.api.http) = {post: "/get_product", body: "*"};
+  }
+
+  rpc ListSkus (ListSkusRequest) returns (ListSkusResponse) {
+    option (google.api.http) = {post: "/list_skus", body: "*"};
+  }
+}
