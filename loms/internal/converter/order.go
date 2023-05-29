@@ -25,8 +25,8 @@ func ToItems(info []*desc.Item) []models.Item {
 func ToOrderDesc(info *models.Order) *desc.ListOrderResponse {
 	return &desc.ListOrderResponse{
 		Status: ToOrderStatusDesc(info.Status),
-		User:    info.User,
-		Items:   ToItemsDesc(info.Items),
+		User:   info.User,
+		Items:  ToItemsDesc(info.Items),
 	}
 }
 
@@ -58,9 +58,8 @@ func ToOrderStatusDesc(status string) desc.OrderStatus {
 	case models.OrderStatusPaid:
 		return desc.OrderStatus_PAID
 	case models.OrderStatusCanceled:
-		return desc.OrderStatus_CANCELLED
+		return desc.OrderStatus_CANCELED
 	default:
 		return desc.OrderStatus_UNKNOWN
 	}
-
 }
