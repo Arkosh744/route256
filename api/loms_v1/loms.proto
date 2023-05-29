@@ -9,7 +9,7 @@ option go_package = "route256/product-service/pkg/loms_v1";
 
 service Loms {
   rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse);
-  rpc ListOrder(OrderIDRequest) returns (ListOrdersResponse);
+  rpc ListOrder(OrderIDRequest) returns (ListOrderResponse);
   rpc OrderPayed(OrderIDRequest) returns (google.protobuf.Empty);
   rpc CancelOrder(OrderIDRequest) returns (google.protobuf.Empty);
   rpc Stocks(StocksRequest) returns (StocksResponse);
@@ -17,7 +17,7 @@ service Loms {
 
 message CreateOrderRequest {
   int64 user = 1 [(validate.rules).int64.gt = 0];
-  repeated Item Item = 2;
+  repeated Item items = 2;
 }
 
 message Item {
@@ -29,18 +29,19 @@ message CreateOrderResponse {
   int64 order_id = 1;
 }
 
-message ListOrdersResponse {
+message ListOrderResponse {
   OrderStatus status = 1;
   int64 user = 2;
-  repeated Item Item = 3;
+  repeated Item items = 3;
 }
 
 enum OrderStatus {
-  NEW = 0;
-  AWAITING_PAYMENT = 1;
-  FAILED = 2;
-  PAID = 3;
-  CANCELLED = 4;
+  UNKNOWN = 0;
+  NEW = 1;
+  AWAITING_PAYMENT = 2;
+  FAILED = 3;
+  PAID = 4;
+  CANCELLED = 5;
 }
 
 message StocksRequest {

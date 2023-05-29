@@ -24,7 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type LomsClient interface {
 	CreateOrder(ctx context.Context, in *CreateOrderRequest, opts ...grpc.CallOption) (*CreateOrderResponse, error)
-	ListOrder(ctx context.Context, in *OrderIDRequest, opts ...grpc.CallOption) (*ListOrdersResponse, error)
+	ListOrder(ctx context.Context, in *OrderIDRequest, opts ...grpc.CallOption) (*ListOrderResponse, error)
 	OrderPayed(ctx context.Context, in *OrderIDRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	CancelOrder(ctx context.Context, in *OrderIDRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	Stocks(ctx context.Context, in *StocksRequest, opts ...grpc.CallOption) (*StocksResponse, error)
@@ -47,8 +47,8 @@ func (c *lomsClient) CreateOrder(ctx context.Context, in *CreateOrderRequest, op
 	return out, nil
 }
 
-func (c *lomsClient) ListOrder(ctx context.Context, in *OrderIDRequest, opts ...grpc.CallOption) (*ListOrdersResponse, error) {
-	out := new(ListOrdersResponse)
+func (c *lomsClient) ListOrder(ctx context.Context, in *OrderIDRequest, opts ...grpc.CallOption) (*ListOrderResponse, error) {
+	out := new(ListOrderResponse)
 	err := c.cc.Invoke(ctx, "/route256.loms.Loms/ListOrder", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -88,7 +88,7 @@ func (c *lomsClient) Stocks(ctx context.Context, in *StocksRequest, opts ...grpc
 // for forward compatibility
 type LomsServer interface {
 	CreateOrder(context.Context, *CreateOrderRequest) (*CreateOrderResponse, error)
-	ListOrder(context.Context, *OrderIDRequest) (*ListOrdersResponse, error)
+	ListOrder(context.Context, *OrderIDRequest) (*ListOrderResponse, error)
 	OrderPayed(context.Context, *OrderIDRequest) (*empty.Empty, error)
 	CancelOrder(context.Context, *OrderIDRequest) (*empty.Empty, error)
 	Stocks(context.Context, *StocksRequest) (*StocksResponse, error)
@@ -102,7 +102,7 @@ type UnimplementedLomsServer struct {
 func (UnimplementedLomsServer) CreateOrder(context.Context, *CreateOrderRequest) (*CreateOrderResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateOrder not implemented")
 }
-func (UnimplementedLomsServer) ListOrder(context.Context, *OrderIDRequest) (*ListOrdersResponse, error) {
+func (UnimplementedLomsServer) ListOrder(context.Context, *OrderIDRequest) (*ListOrderResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListOrder not implemented")
 }
 func (UnimplementedLomsServer) OrderPayed(context.Context, *OrderIDRequest) (*empty.Empty, error) {

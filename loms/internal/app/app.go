@@ -2,19 +2,19 @@ package app
 
 import (
 	"context"
-	"fmt"
 	"net"
-	"net/http"
-	"time"
 
 	"route256/loms/internal/config"
-	"route256/loms/internal/handlers"
 	"route256/loms/internal/log"
+	descLomsV1 "route256/pkg/loms_v1"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 type App struct {
 	serviceProvider *serviceProvider
-	httpServer      *http.Server
+	grpcServer      *grpc.Server
 }
 
 func NewApp(ctx context.Context) (*App, error) {
@@ -29,8 +29,9 @@ func NewApp(ctx context.Context) (*App, error) {
 }
 
 func (app *App) Run() error {
-	if err := app.RunHTTPServer(); err != nil {
-		log.Fatalf("ERR: ", err)
+	err := app.RunGrpcServer()
+	if err != nil {
+		log.Fatalf("failed to run grpc server: %v", err)
 	}
 
 	return nil
@@ -41,7 +42,7 @@ func (app *App) initDeps(ctx context.Context) error {
 		config.Init,
 		log.InitLogger,
 		app.initServiceProvider,
-		app.initHTTPServer,
+		app.initGrpcServer,
 	} {
 		if err := init(ctx); err != nil {
 			return err
@@ -57,22 +58,26 @@ func (app *App) initServiceProvider(ctx context.Context) error {
 	return nil
 }
 
-func (app *App) initHTTPServer(_ context.Context) error {
-	app.httpServer = &http.Server{
-		Addr:         net.JoinHostPort(config.AppConfig.Host, config.AppConfig.Port),
-		Handler:      handlers.InitRouter(app.serviceProvider.service),
-		ReadTimeout:  15 * time.Second,
-		WriteTimeout: 15 * time.Second,
-	}
+func (app *App) initGrpcServer(ctx context.Context) error {
+	app.grpcServer = grpc.NewServer()
+	reflection.Register(app.grpcServer)
+
+	descLomsV1.RegisterLomsServer(app.grpcServer, app.serviceProvider.GetLomsImpl(ctx))
 
 	return nil
 }
 
-func (app *App) RunHTTPServer() error {
-	log.Infof("Starting: HTTP server listening on port %s", config.AppConfig.Port)
+func (app *App) RunGrpcServer() error {
+	log.Infof("GRPC server listening on port %s", config.AppConfig.GetGRPCAddr())
 
-	if err := app.httpServer.ListenAndServe(); err != nil {
-		return fmt.Errorf("failed starting http server: %w", err)
+	list, err := net.Listen("tcp", config.AppConfig.GetGRPCAddr())
+	if err != nil {
+		return err
+	}
+
+	err = app.grpcServer.Serve(list)
+	if err != nil {
+		return err
 	}
 
 	return nil

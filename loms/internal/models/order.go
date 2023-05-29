@@ -1,6 +1,7 @@
 package models
 
 const (
+	OrderStatysUnknown         = "unknown"
 	OrderStatusNew             = "new"
 	OrderStatusAwaitingPayment = "awaiting_payment"
 	OrderStatusFailed          = "failed"
