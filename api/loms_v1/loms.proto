@@ -41,7 +41,7 @@ enum OrderStatus {
   AWAITING_PAYMENT = 2;
   FAILED = 3;
   PAID = 4;
-  CANCELLED = 5;
+  CANCELED = 5;
 }
 
 message StocksRequest {
