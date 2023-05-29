@@ -3,12 +3,13 @@ package app
 import (
 	"context"
 
-	checkoutV1 "route256/checkout/internal/api/checkout_v1"
 	"route256/checkout/internal/clients/loms"
 	"route256/checkout/internal/clients/ps"
 	"route256/checkout/internal/config"
 	"route256/checkout/internal/repository/cart"
 	"route256/checkout/internal/service"
+
+	checkoutV1 "route256/checkout/internal/api/checkout_v1"
 )
 
 type serviceProvider struct {

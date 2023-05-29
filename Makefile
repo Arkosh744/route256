@@ -17,6 +17,8 @@ generate:
 	make generate-product-api
 	mkdir -p pkg/statik
 	./bin/statik -src=pkg/swagger -include='*.css,*.html,*.js,*.json,*.png'
+	cp -r ./statik/statik.go pkg/statik/statik.go
+	rm -rf ./statik
 
 generate-checkout-api:
 	mkdir -p pkg/checkout_v1
@@ -58,7 +60,7 @@ generate-product-api:
 
 lint:
 	gofumpt -w -extra .
-	golangci-lint run ./... --fix
+	golangci-lint run checkout/... loms/... notifications/... libs/... pkg/...
 
 build-all:
 	cd checkout && GOOS=linux GOARCH=amd64 make build

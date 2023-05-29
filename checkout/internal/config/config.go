@@ -12,22 +12,23 @@ import (
 const pathToConfig = "config.yaml"
 
 type Config struct {
-	Token string `yaml:"token"`
+	Token   string `yaml:"token"`
+	Timeout string `yaml:"timeout"`
 
-	GRPC  struct {
+	GRPC struct {
 		Host string `yaml:"host"`
 		Port string `yaml:"port"`
-	} `yaml:"GRPC"`
+	} `yaml:"grpc"`
 
 	HTTP struct {
 		Host string `yaml:"host"`
 		Port string `yaml:"port"`
-	} `yaml:"HTTP"`
+	} `yaml:"http"`
 
 	Swagger struct {
 		Host string `yaml:"host"`
 		Port string `yaml:"port"`
-	} `yaml:"Swagger"`
+	} `yaml:"swagger"`
 
 	Services struct {
 		Loms           string `yaml:"loms"`

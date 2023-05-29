@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"time"
+
 	"route256/loms/internal/config"
 	"route256/loms/internal/handlers"
 	"route256/loms/internal/log"
-	"time"
 )
 
 type App struct {

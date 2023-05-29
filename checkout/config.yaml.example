@@ -1,10 +1,17 @@
-token: "testtoken"
-host: "0.0.0.0"
-port: 8080
+token: "ZuWW6GdhjQYzDBEX3OopJNpl"
+grpc:
+  host: "0.0.0.0"
+  port: 50052
+http:
+  host: "0.0.0.0"
+  port: 8080
+swagger:
+  host: "0.0.0.0"
+  port: 8088
 
 services:
   loms: "http://loms:8081"
-  productService: "http://route256.pavl.uk:8080"
+  productService: "http://route256.pavl.uk:8082"
 
 log:
   preset: "dev"

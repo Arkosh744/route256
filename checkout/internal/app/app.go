@@ -2,16 +2,18 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"net"
 	"net/http"
 	"sync"
-
-	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"time"
 
 	"route256/checkout/internal/config"
 	"route256/checkout/internal/log"
 	"route256/libs/closer"
+
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 
 	descCheckoutV1 "route256/pkg/checkout_v1"
 	_ "route256/pkg/statik"
@@ -50,6 +52,7 @@ func (app *App) Run() error {
 	wg := sync.WaitGroup{}
 
 	wg.Add(1)
+
 	go func() {
 		defer wg.Done()
 
@@ -60,6 +63,7 @@ func (app *App) Run() error {
 	}()
 
 	wg.Add(1)
+
 	go func() {
 		defer wg.Done()
 
@@ -70,6 +74,7 @@ func (app *App) Run() error {
 	}()
 
 	wg.Add(1)
+
 	go func() {
 		defer wg.Done()
 
@@ -112,6 +117,7 @@ func (app *App) initGrpcServer(ctx context.Context) error {
 	reflection.Register(app.grpcServer)
 
 	descCheckoutV1.RegisterCheckoutServer(app.grpcServer, app.serviceProvider.GetCheckoutImpl(ctx))
+
 	return nil
 }
 
@@ -150,9 +156,15 @@ func (app *App) initHTTPServer(ctx context.Context) error {
 		AllowCredentials: true,
 	})
 
+	timeout, err := time.ParseDuration(config.AppConfig.Timeout)
+	if err != nil {
+		return fmt.Errorf("failed to parse timeout: %w", err)
+	}
+
 	app.httpServer = &http.Server{
-		Addr:    config.AppConfig.GetHTTPAddr(),
-		Handler: corsMiddleware.Handler(mux),
+		Addr:              config.AppConfig.GetHTTPAddr(),
+		Handler:           corsMiddleware.Handler(mux),
+		ReadHeaderTimeout: timeout,
 	}
 
 	return nil
@@ -179,9 +191,15 @@ func (app *App) initSwaggerServer(_ context.Context) error {
 	mux.Handle("/", http.StripPrefix("/", http.FileServer(statikFs)))
 	mux.HandleFunc("/swagger.json", serveSwaggerFile("/swagger.json"))
 
+	timeout, err := time.ParseDuration(config.AppConfig.Timeout)
+	if err != nil {
+		return fmt.Errorf("failed to parse timeout: %w", err)
+	}
+
 	app.swaggerServer = &http.Server{
-		Addr:    config.AppConfig.GetSwaggerAddr(),
-		Handler: mux,
+		Addr:              config.AppConfig.GetSwaggerAddr(),
+		Handler:           mux,
+		ReadHeaderTimeout: timeout,
 	}
 
 	return nil
@@ -203,12 +221,14 @@ func serveSwaggerFile(path string) http.HandlerFunc {
 		statikFs, err := fs.New()
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
+
 			return
 		}
 
 		file, err := statikFs.Open(path)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
+
 			return
 		}
 		defer file.Close()
@@ -216,13 +236,16 @@ func serveSwaggerFile(path string) http.HandlerFunc {
 		content, err := io.ReadAll(file)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
+
 			return
 		}
 
 		w.Header().Set("Content-Type", "application/json")
+
 		_, err = w.Write(content)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
+
 			return
 		}
 	}

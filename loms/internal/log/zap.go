@@ -3,8 +3,9 @@ package log
 import (
 	"context"
 	l "log"
-	"route256/loms/internal/config"
 	"time"
+
+	"route256/loms/internal/config"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
