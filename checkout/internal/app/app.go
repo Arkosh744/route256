@@ -144,7 +144,7 @@ func (app *App) initHTTPServer(ctx context.Context) error {
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	}
 
-	err := descCheckoutV1.RegisterCheckoutHandlerFromEndpoint(ctx, mux, config.AppConfig.GetHTTPAddr(), opts)
+	err := descCheckoutV1.RegisterCheckoutHandlerFromEndpoint(ctx, mux, config.AppConfig.GetGRPCAddr(), opts)
 	if err != nil {
 		return err
 	}

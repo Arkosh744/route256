@@ -16,9 +16,8 @@ type serviceProvider struct {
 	repo cart.Repository
 }
 
-func newServiceProvider(ctx context.Context) *serviceProvider {
+func newServiceProvider(_ context.Context) *serviceProvider {
 	sp := &serviceProvider{}
-	sp.GetLomsService(ctx)
 
 	return sp
 }

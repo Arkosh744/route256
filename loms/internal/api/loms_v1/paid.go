@@ -8,7 +8,7 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 )
 
-func (i *Implementation) Paid(ctx context.Context, orderID *desc.OrderIDRequest) (*empty.Empty, error) {
+func (i *Implementation) OrderPayed(ctx context.Context, orderID *desc.OrderIDRequest) (*empty.Empty, error) {
 	err := i.lomsService.Paid(ctx, orderID.GetOrderId())
 	if err != nil {
 		return nil, err

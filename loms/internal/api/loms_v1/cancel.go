@@ -8,7 +8,7 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 )
 
-func (i *Implementation) Cancel(ctx context.Context, orderID *desc.OrderIDRequest) (*empty.Empty, error) {
+func (i *Implementation) CancelOrder(ctx context.Context, orderID *desc.OrderIDRequest) (*empty.Empty, error) {
 	err := i.lomsService.Cancel(ctx, orderID.GetOrderId())
 	if err != nil {
 		return nil, err

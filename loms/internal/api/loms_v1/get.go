@@ -7,7 +7,7 @@ import (
 	desc "route256/pkg/loms_v1"
 )
 
-func (i *Implementation) Get(ctx context.Context, req *desc.OrderIDRequest) (*desc.ListOrderResponse, error) {
+func (i *Implementation) ListOrder(ctx context.Context, req *desc.OrderIDRequest) (*desc.ListOrderResponse, error) {
 	res, err := i.lomsService.Get(ctx, req.GetOrderId())
 	if err != nil {
 		return nil, err

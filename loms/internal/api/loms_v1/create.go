@@ -7,7 +7,7 @@ import (
 	desc "route256/pkg/loms_v1"
 )
 
-func (i *Implementation) Create(ctx context.Context, req *desc.CreateOrderRequest) (*desc.CreateOrderResponse, error) {
+func (i *Implementation) CreateOrder(ctx context.Context, req *desc.CreateOrderRequest) (*desc.CreateOrderResponse, error) {
 	res, err := i.lomsService.Create(ctx, req.GetUser(), converter.ToItems(req.GetItems()))
 	if err != nil {
 		return nil, err
