@@ -4,6 +4,7 @@ import (
 	"context"
 	"net"
 
+	"route256/libs/interceptor"
 	"route256/loms/internal/config"
 	"route256/loms/internal/log"
 	descLomsV1 "route256/pkg/loms_v1"
@@ -59,7 +60,9 @@ func (app *App) initServiceProvider(ctx context.Context) error {
 }
 
 func (app *App) initGrpcServer(ctx context.Context) error {
-	app.grpcServer = grpc.NewServer()
+	app.grpcServer = grpc.NewServer(
+		grpc.UnaryInterceptor(interceptor.ValidateInterceptor),
+	)
 	reflection.Register(app.grpcServer)
 
 	descLomsV1.RegisterLomsServer(app.grpcServer, app.serviceProvider.GetLomsImpl(ctx))

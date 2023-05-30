@@ -12,6 +12,7 @@ import (
 	"route256/checkout/internal/config"
 	"route256/checkout/internal/log"
 	"route256/libs/closer"
+	"route256/libs/interceptor"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 
@@ -113,7 +114,9 @@ func (app *App) initServiceProvider(ctx context.Context) error {
 }
 
 func (app *App) initGrpcServer(ctx context.Context) error {
-	app.grpcServer = grpc.NewServer()
+	app.grpcServer = grpc.NewServer(
+		grpc.UnaryInterceptor(interceptor.ValidateInterceptor),
+	)
 	reflection.Register(app.grpcServer)
 
 	descCheckoutV1.RegisterCheckoutServer(app.grpcServer, app.serviceProvider.GetCheckoutImpl(ctx))
