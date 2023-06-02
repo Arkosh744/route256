@@ -3,8 +3,9 @@ package log
 import (
 	"context"
 	l "log"
-	"route256/checkout/internal/config"
 	"time"
+
+	"route256/checkout/internal/config"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"

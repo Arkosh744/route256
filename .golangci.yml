@@ -66,6 +66,9 @@ linters-settings:
       - tc
       - ip
       - f # test function
+  stylecheck:
+    checks:
+      - '-ST1003'
 
 linters:
   enable-all: true
@@ -107,6 +110,7 @@ linters:
     - promlinter
     - scopelint # Deprecated
     - testpackage
+    - gofumpt
 
 run:
   timeout: 10m

@@ -3,6 +3,7 @@ package config
 import (
 	"context"
 	"fmt"
+	"net"
 	"os"
 
 	"gopkg.in/yaml.v3"
@@ -11,9 +12,23 @@ import (
 const pathToConfig = "config.yaml"
 
 type Config struct {
-	Token string `yaml:"token"`
-	Host  string `yaml:"host"`
-	Port  string `yaml:"port"`
+	Token   string `yaml:"token"`
+	Timeout string `yaml:"timeout"`
+
+	GRPC struct {
+		Host string `yaml:"host"`
+		Port string `yaml:"port"`
+	} `yaml:"grpc"`
+
+	HTTP struct {
+		Host string `yaml:"host"`
+		Port string `yaml:"port"`
+	} `yaml:"http"`
+
+	Swagger struct {
+		Host string `yaml:"host"`
+		Port string `yaml:"port"`
+	} `yaml:"swagger"`
 
 	Services struct {
 		Loms           string `yaml:"loms"`
@@ -39,4 +54,16 @@ func Init(_ context.Context) error {
 	}
 
 	return nil
+}
+
+func (c *Config) GetGRPCAddr() string {
+	return net.JoinHostPort(c.GRPC.Host, c.GRPC.Port)
+}
+
+func (c *Config) GetHTTPAddr() string {
+	return net.JoinHostPort(c.HTTP.Host, c.HTTP.Port)
+}
+
+func (c *Config) GetSwaggerAddr() string {
+	return net.JoinHostPort(c.Swagger.Host, c.Swagger.Port)
 }

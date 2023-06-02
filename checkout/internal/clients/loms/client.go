@@ -2,13 +2,12 @@ package loms
 
 import (
 	"context"
+
 	"route256/checkout/internal/models"
+	lomsV1 "route256/pkg/loms_v1"
 )
 
-const (
-	stocksPath      = "stocks"
-	createOrderPath = "createOrder"
-)
+var _ Client = (*client)(nil)
 
 type Client interface {
 	Stocks(ctx context.Context, sku uint32) ([]*models.Stock, error)
@@ -16,9 +15,11 @@ type Client interface {
 }
 
 type client struct {
-	host string
+	lomsClient lomsV1.LomsClient
 }
 
-func New(host string) *client {
-	return &client{host: host}
+func New(loms lomsV1.LomsClient) *client {
+	return &client{
+		lomsClient: loms,
+	}
 }

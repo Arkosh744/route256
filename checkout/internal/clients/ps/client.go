@@ -2,44 +2,37 @@ package ps
 
 import (
 	"context"
-	"fmt"
-	"net/http"
-	"net/url"
+
 	"route256/checkout/internal/config"
+	"route256/checkout/internal/converter"
 	"route256/checkout/internal/models"
-	"route256/libs/wrappers"
+	productV1 "route256/pkg/product_v1"
 )
 
-const (
-	getProductPath = "get_product"
-)
+var _ Client = (*client)(nil)
 
 type Client interface {
 	GetProduct(ctx context.Context, sku uint32) (*models.ItemBase, error)
 }
 
 type client struct {
-	pathStock string
+	psClient productV1.ProductServiceClient
 }
 
-type ItemsRequest struct {
-	Token string `json:"token"`
-	SKU   uint32 `json:"sku"`
-}
-
-func New(clientURL string) *client {
-	stockURL, _ := url.JoinPath(clientURL, getProductPath)
-
-	return &client{pathStock: stockURL}
+func New(ps productV1.ProductServiceClient) *client {
+	return &client{
+		psClient: ps,
+	}
 }
 
 func (c *client) GetProduct(ctx context.Context, sku uint32) (*models.ItemBase, error) {
-	req := ItemsRequest{Token: config.AppConfig.Token, SKU: sku}
-
-	res, err := wrappers.Do[ItemsRequest, models.ItemBase](ctx, &req, http.MethodPost, c.pathStock)
+	res, err := c.psClient.GetProduct(ctx, &productV1.GetProductRequest{
+		Token: config.AppConfig.Token,
+		Sku:   sku,
+	})
 	if err != nil {
-		return nil, fmt.Errorf(`do request "%s": %w`, c.pathStock, err)
+		return nil, err
 	}
 
-	return res, nil
+	return converter.DescToItemBase(res), nil
 }
