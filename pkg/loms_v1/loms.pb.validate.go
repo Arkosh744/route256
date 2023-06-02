@@ -794,7 +794,7 @@ func (m *Stock) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for WarehouseID
+	// no validation rules for WarehouseId
 
 	// no validation rules for Count
 

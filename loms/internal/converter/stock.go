@@ -7,7 +7,7 @@ import (
 
 func ToStockDesc(item models.StockItem) *desc.Stock {
 	return &desc.Stock{
-		WarehouseID: item.WarehouseID,
+		WarehouseId: item.WarehouseID,
 		Count:       item.Count,
 	}
 }

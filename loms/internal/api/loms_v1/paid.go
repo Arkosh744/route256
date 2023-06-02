@@ -9,8 +9,7 @@ import (
 )
 
 func (i *Implementation) OrderPayed(ctx context.Context, orderID *desc.OrderIDRequest) (*empty.Empty, error) {
-	err := i.lomsService.Paid(ctx, orderID.GetOrderId())
-	if err != nil {
+	if err := i.lomsService.Paid(ctx, orderID.GetOrderId()); err != nil {
 		return nil, err
 	}
 

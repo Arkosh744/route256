@@ -53,7 +53,7 @@ message StocksResponse {
 }
 
 message Stock {
-  int64 warehouseID = 1;
+  int64 warehouse_id = 1;
   uint64 count = 2;
 }
 

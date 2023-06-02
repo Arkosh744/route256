@@ -11,8 +11,7 @@ import (
 )
 
 func (i *Implementation) AddToCart(ctx context.Context, req *desc.CartRequest) (*empty.Empty, error) {
-	err := i.cartService.AddToCart(ctx, req.GetUser(), req.GetSku(), uint16(req.GetCount()))
-	if err != nil {
+	if err := i.cartService.AddToCart(ctx, req.GetUser(), req.GetSku(), uint16(req.GetCount())); err != nil {
 		return nil, status.Errorf(codes.Internal, "error adding to cart: %v", err)
 	}
 

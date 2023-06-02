@@ -42,7 +42,7 @@ func DescToStock(in *descLoms.StocksResponse) []*models.Stock {
 
 	for _, v := range in.Stocks {
 		result = append(result, &models.Stock{
-			WarehouseID: v.GetWarehouseID(),
+			WarehouseID: v.GetWarehouseId(),
 			Count:       v.GetCount(),
 		})
 	}

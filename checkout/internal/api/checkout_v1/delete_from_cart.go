@@ -11,8 +11,7 @@ import (
 )
 
 func (i *Implementation) DeleteFromCart(ctx context.Context, req *desc.CartRequest) (*empty.Empty, error) {
-	err := i.cartService.DeleteFromCart(ctx, req.GetUser(), req.GetSku(), uint16(req.GetCount()))
-	if err != nil {
+	if err := i.cartService.DeleteFromCart(ctx, req.GetUser(), req.GetSku(), uint16(req.GetCount())); err != nil {
 		return nil, status.Errorf(codes.Internal, "error removing from cart: %v", err)
 	}
 
