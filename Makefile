@@ -71,6 +71,14 @@ run-all: build-all
 	sudo docker compose up --force-recreate --build
 	#docker-compose up --force-recreate --build
 
+test-all:
+	cd checkout && make test
+	cd loms && make test
+	cd notifications && make test
+
+test:
+	go test -v ./...
+
 precommit:
 	cd checkout && make precommit
 	cd loms && make precommit
