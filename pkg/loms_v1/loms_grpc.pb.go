@@ -58,7 +58,7 @@ func (c *lomsClient) ListOrder(ctx context.Context, in *OrderIDRequest, opts ...
 
 func (c *lomsClient) OrderPayed(ctx context.Context, in *OrderIDRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
 	out := new(empty.Empty)
-	err := c.cc.Invoke(ctx, "/route256.loms.Loms/OrderPayed", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/route256.loms.Loms/OrderPaid", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +89,7 @@ func (c *lomsClient) Stocks(ctx context.Context, in *StocksRequest, opts ...grpc
 type LomsServer interface {
 	CreateOrder(context.Context, *CreateOrderRequest) (*CreateOrderResponse, error)
 	ListOrder(context.Context, *OrderIDRequest) (*ListOrderResponse, error)
-	OrderPayed(context.Context, *OrderIDRequest) (*empty.Empty, error)
+	OrderPaid(context.Context, *OrderIDRequest) (*empty.Empty, error)
 	CancelOrder(context.Context, *OrderIDRequest) (*empty.Empty, error)
 	Stocks(context.Context, *StocksRequest) (*StocksResponse, error)
 	mustEmbedUnimplementedLomsServer()
@@ -105,8 +105,8 @@ func (UnimplementedLomsServer) CreateOrder(context.Context, *CreateOrderRequest)
 func (UnimplementedLomsServer) ListOrder(context.Context, *OrderIDRequest) (*ListOrderResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListOrder not implemented")
 }
-func (UnimplementedLomsServer) OrderPayed(context.Context, *OrderIDRequest) (*empty.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method OrderPayed not implemented")
+func (UnimplementedLomsServer) OrderPaid(context.Context, *OrderIDRequest) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method OrderPaid not implemented")
 }
 func (UnimplementedLomsServer) CancelOrder(context.Context, *OrderIDRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CancelOrder not implemented")
@@ -169,14 +169,14 @@ func _Loms_OrderPayed_Handler(srv interface{}, ctx context.Context, dec func(int
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(LomsServer).OrderPayed(ctx, in)
+		return srv.(LomsServer).OrderPaid(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/route256.loms.Loms/OrderPayed",
+		FullMethod: "/route256.loms.Loms/OrderPaid",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LomsServer).OrderPayed(ctx, req.(*OrderIDRequest))
+		return srv.(LomsServer).OrderPaid(ctx, req.(*OrderIDRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -233,7 +233,7 @@ var Loms_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Loms_ListOrder_Handler,
 		},
 		{
-			MethodName: "OrderPayed",
+			MethodName: "OrderPaid",
 			Handler:    _Loms_OrderPayed_Handler,
 		},
 		{

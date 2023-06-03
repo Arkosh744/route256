@@ -12,8 +12,7 @@ import (
 
 func Test_cartService_AddToCart(t *testing.T) {
 	ctx := context.Background()
-	err := log.InitLogger(ctx)
-	if err != nil {
+	if err := log.InitLogger(ctx); err != nil {
 		t.Fatalf("error initializing logger: %v", err)
 	}
 

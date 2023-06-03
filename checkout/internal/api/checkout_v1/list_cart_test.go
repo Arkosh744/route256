@@ -17,6 +17,7 @@ import (
 
 func TestImplementation_ListCart(t *testing.T) {
 	ctx := context.Background()
+
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
@@ -40,7 +41,7 @@ func TestImplementation_ListCart(t *testing.T) {
 				User: 1,
 			},
 			resInfo:        &models.CartInfo{},
-			mockServiceErr: errors.New("failed to purchase"),
+			mockServiceErr: errors.New("failed to list cart"),
 			wantErr:        true,
 			wantCode:       codes.Internal,
 		},
@@ -69,7 +70,8 @@ func TestImplementation_ListCart(t *testing.T) {
 						ItemData: models.ItemData{
 							SKU:   2,
 							Count: 1,
-						}},
+						},
+					},
 				},
 				TotalPrice: 3,
 			},
@@ -79,7 +81,6 @@ func TestImplementation_ListCart(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			mockCartService.EXPECT().
 				ListCart(ctx, tt.req.GetUser()).
 				Return(tt.resInfo, tt.mockServiceErr).

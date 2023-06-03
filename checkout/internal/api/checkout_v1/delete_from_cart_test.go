@@ -15,6 +15,7 @@ import (
 
 func TestImplementation_DeleteFromCart(t *testing.T) {
 	ctx := context.Background()
+
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 

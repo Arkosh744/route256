@@ -71,13 +71,14 @@ run-all: build-all
 	sudo docker compose up --force-recreate --build
 	#docker-compose up --force-recreate --build
 
-test-all:
-	cd checkout && make test
-	cd loms && make test
-	cd notifications && make test
-
 test:
-	go test -v ./...
+	cd checkout && go test ./...
+	cd loms && go test ./...
+	cd notifications && go test ./...
+
+regenerate_mocks:
+	cd checkout && go generate -run="mockgen .*" -x ./...
+	cd loms && go generate -run="mockgen .*" -x ./...
 
 precommit:
 	cd checkout && make precommit

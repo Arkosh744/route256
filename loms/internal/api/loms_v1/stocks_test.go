@@ -1,11 +1,13 @@
-package checkout_v1
+package loms_v1
 
 import (
 	"context"
 	"errors"
 	"testing"
 
-	desc "route256/pkg/checkout_v1"
+	"route256/loms/internal/converter"
+	"route256/loms/internal/models"
+	desc "route256/pkg/loms_v1"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -13,59 +15,59 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func TestImplementation_Purchase(t *testing.T) {
+func TestImplementation_Stocks(t *testing.T) {
 	ctx := context.Background()
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
-	mockCartService := NewMockService(mockCtrl)
+	mockService := NewMockService(mockCtrl)
 
 	impl := &Implementation{
-		cartService: mockCartService,
+		lomsService: mockService,
 	}
 
 	tests := []struct {
 		name           string
-		req            *desc.OrderIDRequest
-		OrderID        int64
+		req            *desc.StocksRequest
+		res            []models.StockItem
 		mockServiceErr error
 		wantErr        bool
 		wantCode       codes.Code
 	}{
 		{
-			name: "fail",
-			req: &desc.OrderIDRequest{
-				User: 1,
-			},
-			OrderID:        0,
-			mockServiceErr: errors.New("failed to purchase"),
+			name:           "fail",
+			req:            &desc.StocksRequest{Sku: 1},
+			mockServiceErr: errors.New("error get stocks"),
 			wantErr:        true,
 			wantCode:       codes.Internal,
 		},
 		{
 			name: "success",
-			req: &desc.OrderIDRequest{
-				User: 1,
+			req:  &desc.StocksRequest{Sku: 1},
+			res: []models.StockItem{
+				{
+					WarehouseID: 1,
+					Count:       1,
+				},
 			},
-			OrderID:        1,
 			mockServiceErr: nil,
 			wantErr:        false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockCartService.EXPECT().
-				Purchase(ctx, tt.req.GetUser()).
-				Return(tt.OrderID, tt.mockServiceErr).
+			mockService.EXPECT().Stocks(ctx, tt.req.GetSku()).
+				Return(tt.res, tt.mockServiceErr).
 				Times(1)
 
-			_, err := impl.Purchase(ctx, tt.req)
+			res, err := impl.Stocks(ctx, tt.req)
 			if tt.wantErr {
 				assert.Error(t, err)
 				assert.Equal(t, tt.wantCode, status.Code(err))
 			} else {
 				assert.NoError(t, err)
+				assert.Equal(t, converter.ToStocksDesc(tt.res), res.GetStocks())
 			}
 		})
 	}
