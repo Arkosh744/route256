@@ -1,19 +1,93 @@
-version: "3.1"
+version: "3.8"
+
 services:
+
   checkout:
     image: checkout
     build: ./checkout/
+    networks:
+      - checkout_network
     ports:
       - "8080:8080"
       - "8088:8088"
       - "50052:50052"
+
+  checkout_postgres:
+    image: postgres:14.7-alpine3.17
+    environment:
+      POSTGRES_USER: checkout-user
+      POSTGRES_PASSWORD: checkout-pass
+      POSTGRES_DB: checkout-db
+    networks:
+      - checkout_network
+    volumes:
+      - checkout_postgres_data:/var/lib/postgresql/data/
+
+  checkout_pgbouncer:
+    image: rmccaffrey/pgbouncer:latest
+    environment:
+      - DATABASE_URL=postgres://checkout-user:checkout-pass@checkout_postgres:5432/checkout-db
+      - POOL_MODE=transaction
+      - MAX_DB_CONNECTIONS=100
+      - DEFAULT_POOL_SIZE=40
+      - AUTH_TYPE=scram-sha-256
+    depends_on:
+      - checkout_postgres
+    networks:
+      - checkout_network
+    ports:
+      - "5439:5432"
+    links:
+    - checkout_postgres
+
+
   loms:
     image: loms
     build: ./loms/
+    networks:
+      - loms_network
     ports:
       - "50053:50053"
+
+  loms_postgres:
+    image: postgres:14.7-alpine3.17
+    environment:
+      POSTGRES_USER: loms-user
+      POSTGRES_PASSWORD: loms-pass
+      POSTGRES_DB: loms-db
+    networks:
+      - loms_network
+    volumes:
+      - loms_postgres_data:/var/lib/postgresql/data/
+
+  loms_pgbouncer:
+    image: rmccaffrey/pgbouncer:latest
+    environment:
+      - DATABASE_URL=postgres://loms-user:loms-pass@loms_postgres:5432/loms-db
+      - POOL_MODE=transaction
+      - MAX_DB_CONNECTIONS=100
+      - DEFAULT_POOL_SIZE=40
+      - AUTH_TYPE=scram-sha-256
+    depends_on:
+      - loms_postgres
+    networks:
+      - loms_network
+    ports:
+      - "5438:5432"
+    links:
+    - loms_postgres
+
   # notification:
   #   image: notification
   #   build: ./notification
   #   ports:
   #     - "8082:8082"
+
+
+networks:
+  checkout_network:
+  loms_network:
+
+volumes:
+  checkout_postgres_data:
+  loms_postgres_data:
