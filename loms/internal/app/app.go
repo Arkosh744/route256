@@ -5,8 +5,8 @@ import (
 	"net"
 
 	"route256/libs/interceptor"
+	"route256/libs/log"
 	"route256/loms/internal/config"
-	"route256/loms/internal/log"
 	descLomsV1 "route256/pkg/loms_v1"
 
 	"google.golang.org/grpc"
@@ -41,13 +41,21 @@ func (app *App) Run() error {
 func (app *App) initDeps(ctx context.Context) error {
 	for _, init := range []func(context.Context) error{
 		config.Init,
-		log.InitLogger,
+		app.initLogger,
 		app.initServiceProvider,
 		app.initGrpcServer,
 	} {
 		if err := init(ctx); err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (app *App) initLogger(ctx context.Context) error {
+	if err := log.InitLogger(ctx, config.AppConfig.Log.Preset); err != nil {
+		return err
 	}
 
 	return nil

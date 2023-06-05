@@ -6,10 +6,10 @@ import (
 	"route256/checkout/internal/clients/loms"
 	"route256/checkout/internal/clients/ps"
 	"route256/checkout/internal/config"
-	"route256/checkout/internal/log"
 	"route256/checkout/internal/repository/cart"
 	"route256/checkout/internal/service"
 	"route256/libs/closer"
+	"route256/libs/log"
 	lomsV1 "route256/pkg/loms_v1"
 	productV1 "route256/pkg/product_v1"
 

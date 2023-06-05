@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"route256/checkout/internal/log"
+	"route256/libs/log"
 )
 
 var ErrStockInsufficient = errors.New("stock insufficient")
