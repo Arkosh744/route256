@@ -9,7 +9,6 @@ install-go-deps:
 	GOBIN=$(LOCAL_BIN) go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@v2.15.2
 	GOBIN=$(LOCAL_BIN) go install github.com/rakyll/statik@latest
 
-
 generate:
 	mkdir -p pkg/swagger
 	make generate-checkout-api

@@ -35,6 +35,35 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 	return m.recorder
 }
 
+// AddToCart mocks base method.
+func (m *MockRepository) AddToCart(ctx context.Context, user int64, item *models.ItemData) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddToCart", ctx, user, item)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AddToCart indicates an expected call of AddToCart.
+func (mr *MockRepositoryMockRecorder) AddToCart(ctx, user, item interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddToCart", reflect.TypeOf((*MockRepository)(nil).AddToCart), ctx, user, item)
+}
+
+// GetCount mocks base method.
+func (m *MockRepository) GetCount(ctx context.Context, user int64, sku uint32) (uint16, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCount", ctx, user, sku)
+	ret0, _ := ret[0].(uint16)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCount indicates an expected call of GetCount.
+func (mr *MockRepositoryMockRecorder) GetCount(ctx, user, sku interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCount", reflect.TypeOf((*MockRepository)(nil).GetCount), ctx, user, sku)
+}
+
 // MockLomsClient is a mock of LomsClient interface.
 type MockLomsClient struct {
 	ctrl     *gomock.Controller

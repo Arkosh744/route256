@@ -7,6 +7,7 @@ services:
     build: ./checkout/
     networks:
       - checkout_network
+      - service_network
     ports:
       - "8080:8080"
       - "8088:8088"
@@ -46,6 +47,7 @@ services:
     build: ./loms/
     networks:
       - loms_network
+      - service_network
     ports:
       - "50053:50053"
 
@@ -85,6 +87,7 @@ services:
 networks:
   checkout_network:
   loms_network:
+  service_network:
 
 volumes:
   checkout_postgres_data:

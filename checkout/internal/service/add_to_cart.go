@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"route256/libs/log"
+	"route256/checkout/internal/models"
 )
 
 var ErrStockInsufficient = errors.New("stock insufficient")
@@ -16,15 +16,28 @@ func (s *cartService) AddToCart(ctx context.Context, user int64, sku uint32, cou
 		return fmt.Errorf("get stocks: %w", err)
 	}
 
-	log.Infof("stocks: %v", stocks)
+	cartCount, err := s.repo.GetCount(ctx, user, sku)
+	if err != nil {
+		return err
+	}
 
-	counter := int64(count)
+	var inStock bool
+	counter := int64(cartCount) + int64(count)
 	for _, stock := range stocks {
 		counter -= int64(stock.Count)
 		if counter <= 0 {
-			return nil
+			inStock = true
+			break
 		}
 	}
 
-	return ErrStockInsufficient
+	if !inStock {
+		return ErrStockInsufficient
+	}
+
+	if err = s.repo.AddToCart(ctx, user, &models.ItemData{SKU: sku, Count: uint32(count)}); err != nil {
+		return err
+	}
+
+	return nil
 }

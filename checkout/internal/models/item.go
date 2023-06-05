@@ -6,8 +6,8 @@ type ItemBase struct {
 }
 
 type ItemData struct {
-	SKU   uint32
-	Count uint32
+	SKU   uint32 `db:"sku"`
+	Count uint32 `db:"count"`
 }
 
 type ItemInfo struct {
@@ -16,6 +16,6 @@ type ItemInfo struct {
 }
 
 type CartInfo struct {
-	Items      []ItemInfo `json:"items"`
-	TotalPrice uint32     `json:"total_price"`
+	Items      []ItemInfo
+	TotalPrice uint32
 }

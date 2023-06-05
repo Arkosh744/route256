@@ -12,7 +12,7 @@ func ListToDesc(info *models.CartInfo) *desc.ListCartResponse {
 	for _, item := range info.Items {
 		deskItems = append(deskItems, &desc.CartItem{
 			Sku:   item.SKU,
-			Count: item.Price,
+			Count: item.Count,
 			Price: item.Price,
 			Name:  item.Name,
 		})
@@ -24,7 +24,7 @@ func ListToDesc(info *models.CartInfo) *desc.ListCartResponse {
 	}
 }
 
-func ItemsDataToDesc(items []*models.ItemData) []*descLoms.Item {
+func ItemsDataToDesc(items []models.ItemData) []*descLoms.Item {
 	deskItems := make([]*descLoms.Item, 0, len(items))
 
 	for _, item := range items {
