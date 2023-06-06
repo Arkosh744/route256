@@ -7,5 +7,10 @@ import (
 )
 
 func (s *service) Create(ctx context.Context, user int64, items []models.Item) (int64, error) {
-	return 1, nil
+	orderID, err := s.repo.CreateOrder(ctx, user, items)
+	if err != nil {
+		return 0, err
+	}
+
+	return orderID, nil
 }

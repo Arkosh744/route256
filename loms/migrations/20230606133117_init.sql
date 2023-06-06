@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS orders
 
 CREATE TABLE IF NOT EXISTS reservations
 (
-    order_id     BIGINT  NOT NULL REFERENCES orders (order_id),
+    order_id     BIGINT  NOT NULL,
     sku          INTEGER NOT NULL,
     count        INTEGER NOT NULL,
     warehouse_id INTEGER NOT NULL,
@@ -21,10 +21,9 @@ Create INDEX IF NOT EXISTS reservations_order_id_idx ON reservations (order_id);
 
 CREATE TABLE IF NOT EXISTS order_items
 (
-    order_id     BIGINT  NOT NULL REFERENCES orders (order_id),
+    order_id     BIGINT  NOT NULL,
     sku          INTEGER NOT NULL,
     count        INTEGER NOT NULL,
-    warehouse_id INTEGER NOT NULL,
     PRIMARY KEY (order_id, sku)
 );
 

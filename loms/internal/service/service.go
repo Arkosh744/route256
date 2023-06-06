@@ -17,5 +17,6 @@ func New(repo Repository) *service {
 }
 
 type Repository interface{
+	CreateOrder(ctx context.Context, user int64, items []models.Item) (int64, error)
 	GetStocks(ctx context.Context, sku uint32) ([]models.StockItem, error)
 }
