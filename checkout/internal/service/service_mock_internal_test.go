@@ -64,6 +64,21 @@ func (mr *MockRepositoryMockRecorder) GetCount(ctx, user, sku interface{}) *gomo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCount", reflect.TypeOf((*MockRepository)(nil).GetCount), ctx, user, sku)
 }
 
+// GetUserData mocks base method.
+func (m *MockRepository) GetUserData(ctx context.Context, user int64) ([]models.ItemData, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserCart", ctx, user)
+	ret0, _ := ret[0].([]models.ItemData)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserData indicates an expected call of GetUserData.
+func (mr *MockRepositoryMockRecorder) GetUserData(ctx, user interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserCart", reflect.TypeOf((*MockRepository)(nil).GetUserData), ctx, user)
+}
+
 // MockLomsClient is a mock of LomsClient interface.
 type MockLomsClient struct {
 	ctrl     *gomock.Controller
@@ -88,7 +103,7 @@ func (m *MockLomsClient) EXPECT() *MockLomsClientMockRecorder {
 }
 
 // CreateOrder mocks base method.
-func (m *MockLomsClient) CreateOrder(ctx context.Context, user int64, items []*models.ItemData) (int64, error) {
+func (m *MockLomsClient) CreateOrder(ctx context.Context, user int64, items []models.ItemData) (int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateOrder", ctx, user, items)
 	ret0, _ := ret[0].(int64)
@@ -141,10 +156,10 @@ func (m *MockPSClient) EXPECT() *MockPSClientMockRecorder {
 }
 
 // GetProduct mocks base method.
-func (m *MockPSClient) GetProduct(ctx context.Context, sku uint32) (*models.ItemBase, error) {
+func (m *MockPSClient) GetProduct(ctx context.Context, sku uint32) (*models.ItemInfo, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetProduct", ctx, sku)
-	ret0, _ := ret[0].(*models.ItemBase)
+	ret0, _ := ret[0].(*models.ItemInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

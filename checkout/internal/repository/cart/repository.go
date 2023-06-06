@@ -72,7 +72,7 @@ func (r *repository) GetCount(ctx context.Context, user int64, sku uint32) (uint
 	return count, nil
 }
 
-func (r *repository) GetUserData(ctx context.Context, user int64) ([]models.ItemData, error) {
+func (r *repository) GetUserCart(ctx context.Context, user int64) ([]models.ItemData, error) {
 	builder := sq.Select("sku", "count").From(tableName).
 		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{"user_id": user})
@@ -83,7 +83,7 @@ func (r *repository) GetUserData(ctx context.Context, user int64) ([]models.Item
 	}
 
 	q := pg.Query{
-		Name:     "checkout.GetUserData",
+		Name:     "checkout.GetUserCart",
 		QueryRaw: query,
 	}
 
@@ -97,4 +97,93 @@ func (r *repository) GetUserData(ctx context.Context, user int64) ([]models.Item
 	return items, nil
 }
 
+func (r *repository) DeleteFromCart(ctx context.Context, user int64, item *models.ItemData) error {
+	if err := r.client.RunRepeatableRead(ctx, func(ctx context.Context) error {
+		count, err := r.GetCount(ctx, user, item.SKU)
+		if err != nil {
+			return err
+		}
 
+		if count < item.Count {
+			ErrStockInsufficient := errors.New("stock insufficient")
+			return ErrStockInsufficient
+		}
+
+		if count > item.Count {
+			return r.removeItemsFromCart(ctx, user, count, item)
+		}
+
+		return r.deleteItemFromCart(ctx, user, item)
+	}); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *repository) deleteItemFromCart(ctx context.Context, user int64, item *models.ItemData) error {
+	builder := sq.Delete(tableName).
+		PlaceholderFormat(sq.Dollar).
+		Where(sq.Eq{"user_id": user, "sku": item.SKU})
+
+	query, v, err := builder.ToSql()
+	if err != nil {
+		return err
+	}
+
+	q := pg.Query{
+		Name:     "checkout.DeleteFromCart",
+		QueryRaw: query,
+	}
+
+	if _, err = r.client.PG().ExecContext(ctx, q, v...); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *repository) removeItemsFromCart(ctx context.Context, user int64, count uint16, item *models.ItemData) error {
+	builder := sq.Update(tableName).
+		PlaceholderFormat(sq.Dollar).
+		Set("count", count-item.Count).
+		Where(sq.Eq{"user_id": user, "sku": item.SKU})
+
+	query, v, err := builder.ToSql()
+	if err != nil {
+		return err
+	}
+
+	q := pg.Query{
+		Name:     "checkout.removeItemsFromCart",
+		QueryRaw: query,
+	}
+
+	if _, err = r.client.PG().ExecContext(ctx, q, v...); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *repository) DeleteUserCart(ctx context.Context, user int64) error  {
+	builder := sq.Delete(tableName).
+		PlaceholderFormat(sq.Dollar).
+		Where(sq.Eq{"user_id": user})
+
+	query, v, err := builder.ToSql()
+	if err != nil {
+		return err
+	}
+
+	q := pg.Query{
+		Name:     "checkout.DeleteUserCart",
+		QueryRaw: query,
+	}
+
+	if _, err = r.client.PG().ExecContext(ctx, q, v...); err != nil {
+		return err
+	}
+
+	return nil
+}

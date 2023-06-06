@@ -16,6 +16,8 @@ var _ Client = (*client)(nil)
 type Client interface {
 	Close() error
 	PG() PG
+
+	RunRepeatableRead(ctx context.Context, fx func(ctxTX context.Context) error) error
 }
 
 type client struct {

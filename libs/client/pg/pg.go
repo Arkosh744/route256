@@ -61,8 +61,10 @@ func (p *pg) Ping(ctx context.Context) error {
 func (p *pg) ExecContext(ctx context.Context, q Query, args ...interface{}) (pgconn.CommandTag, error) {
 	log.Infof("%s; %s", q.QueryRaw, args)
 
-	tx := ctx.Value("tx")
+	tx := ctx.Value(key)
 	if tx != nil {
+		log.Info("do exec in tx")
+
 		return tx.(pgx.Tx).Exec(ctx, q.QueryRaw, args...)
 	}
 
@@ -72,8 +74,10 @@ func (p *pg) ExecContext(ctx context.Context, q Query, args ...interface{}) (pgc
 func (p *pg) QueryContext(ctx context.Context, q Query, args ...interface{}) (pgx.Rows, error) {
 	log.Infof("%s; %s", q.QueryRaw, args)
 
-	tx := ctx.Value("tx")
+	tx := ctx.Value(key)
 	if tx != nil {
+		log.Info("do query in tx")
+
 		return tx.(pgx.Tx).Query(ctx, q.QueryRaw, args...)
 	}
 
@@ -83,8 +87,10 @@ func (p *pg) QueryContext(ctx context.Context, q Query, args ...interface{}) (pg
 func (p *pg) QueryRowContext(ctx context.Context, q Query, args ...interface{}) pgx.Row {
 	log.Infof("%s; %s", q.QueryRaw, args)
 
-	tx := ctx.Value("tx")
+	tx := ctx.Value(key)
 	if tx != nil {
+		log.Info("do query row in tx")
+
 		return tx.(pgx.Tx).QueryRow(ctx, q.QueryRaw, args...)
 	}
 

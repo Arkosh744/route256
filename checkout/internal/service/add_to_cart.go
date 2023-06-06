@@ -35,7 +35,7 @@ func (s *cartService) AddToCart(ctx context.Context, user int64, sku uint32, cou
 		return ErrStockInsufficient
 	}
 
-	if err = s.repo.AddToCart(ctx, user, &models.ItemData{SKU: sku, Count: uint32(count)}); err != nil {
+	if err = s.repo.AddToCart(ctx, user, &models.ItemData{SKU: sku, Count: count}); err != nil {
 		return err
 	}
 
