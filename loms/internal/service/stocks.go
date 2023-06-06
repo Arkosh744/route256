@@ -7,9 +7,9 @@ import (
 )
 
 func (s *service) Stocks(ctx context.Context, sku uint32) ([]models.StockItem, error) {
-	items := []models.StockItem{
-		{WarehouseID: 4678287, Count: 10},
-		{WarehouseID: 123545, Count: 20},
+	items, err := s.repo.GetStocks(ctx, sku)
+	if err != nil {
+		return nil, err
 	}
 
 	return items, nil

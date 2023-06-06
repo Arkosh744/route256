@@ -7,7 +7,10 @@ LINTBIN=${BINDIR}/lint_${GOVER}_${LINTVER}
 PACKAGE=route256/loms/cmd/app
 
 LOCAL_MIGRATION_DIR=./migrations
-LOCAL_MIGRATION_DSN="host=localhost port=6433 dbname=checkout-db user=checkout-user password=checkout-pass sslmode=disable"
+LOCAL_MIGRATION_DSN="host=localhost port=6433 dbname=loms-db user=loms-user password=loms-pass sslmode=disable"
+
+local-migration-status:
+	goose -dir ${LOCAL_MIGRATION_DIR} postgres ${LOCAL_MIGRATION_DSN} status -v
 
 local-migration-up:
 	goose -dir ${LOCAL_MIGRATION_DIR} postgres ${LOCAL_MIGRATION_DSN} up -v

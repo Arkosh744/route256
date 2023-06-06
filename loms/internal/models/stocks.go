@@ -1,6 +1,6 @@
 package models
 
 type StockItem struct {
-	WarehouseID int64  `json:"warehouse_id"`
-	Count       uint64 `json:"count"`
+	WarehouseID int64  `db:"warehouse_id" json:"warehouse_id"`
+	Count       uint64 `db:"count" json:"count"`
 }

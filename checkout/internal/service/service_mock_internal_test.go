@@ -49,6 +49,34 @@ func (mr *MockRepositoryMockRecorder) AddToCart(ctx, user, item interface{}) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddToCart", reflect.TypeOf((*MockRepository)(nil).AddToCart), ctx, user, item)
 }
 
+// DeleteFromCart mocks base method.
+func (m *MockRepository) DeleteFromCart(ctx context.Context, user int64, item *models.ItemData) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteFromCart", ctx, user, item)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteFromCart indicates an expected call of DeleteFromCart.
+func (mr *MockRepositoryMockRecorder) DeleteFromCart(ctx, user, item interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteFromCart", reflect.TypeOf((*MockRepository)(nil).DeleteFromCart), ctx, user, item)
+}
+
+// DeleteUserCart mocks base method.
+func (m *MockRepository) DeleteUserCart(ctx context.Context, user int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteUserCart", ctx, user)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteUserCart indicates an expected call of DeleteUserCart.
+func (mr *MockRepositoryMockRecorder) DeleteUserCart(ctx, user interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteUserCart", reflect.TypeOf((*MockRepository)(nil).DeleteUserCart), ctx, user)
+}
+
 // GetCount mocks base method.
 func (m *MockRepository) GetCount(ctx context.Context, user int64, sku uint32) (uint16, error) {
 	m.ctrl.T.Helper()
@@ -64,8 +92,8 @@ func (mr *MockRepositoryMockRecorder) GetCount(ctx, user, sku interface{}) *gomo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCount", reflect.TypeOf((*MockRepository)(nil).GetCount), ctx, user, sku)
 }
 
-// GetUserData mocks base method.
-func (m *MockRepository) GetUserData(ctx context.Context, user int64) ([]models.ItemData, error) {
+// GetUserCart mocks base method.
+func (m *MockRepository) GetUserCart(ctx context.Context, user int64) ([]models.ItemData, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserCart", ctx, user)
 	ret0, _ := ret[0].([]models.ItemData)
@@ -73,10 +101,10 @@ func (m *MockRepository) GetUserData(ctx context.Context, user int64) ([]models.
 	return ret0, ret1
 }
 
-// GetUserData indicates an expected call of GetUserData.
-func (mr *MockRepositoryMockRecorder) GetUserData(ctx, user interface{}) *gomock.Call {
+// GetUserCart indicates an expected call of GetUserCart.
+func (mr *MockRepositoryMockRecorder) GetUserCart(ctx, user interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserCart", reflect.TypeOf((*MockRepository)(nil).GetUserData), ctx, user)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserCart", reflect.TypeOf((*MockRepository)(nil).GetUserCart), ctx, user)
 }
 
 // MockLomsClient is a mock of LomsClient interface.
