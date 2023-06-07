@@ -2,13 +2,11 @@ package cart
 
 import (
 	"context"
-	"errors"
 
 	"route256/libs/client/pg"
 	"route256/loms/internal/models"
 
 	sq "github.com/Masterminds/squirrel"
-	"go.uber.org/multierr"
 )
 
 type repository struct {
@@ -50,92 +48,56 @@ func (r *repository) GetStocks(ctx context.Context, sku uint32) ([]models.StockI
 	return stocks, nil
 }
 
-func (r *repository) CreateOrder(ctx context.Context, user int64, items []models.Item) (int64, error) {
-	orderID, err := r.createOrder(ctx, user)
+func (r *repository) GetReservations(ctx context.Context, orderID int64) ([]models.ReservationItem, error) {
+	builder := sq.Select("sku", "warehouse_id", "count").
+		From(tableReservation).
+		PlaceholderFormat(sq.Dollar).
+		Where(sq.Eq{"order_id": orderID})
+
+	query, v, err := builder.ToSql()
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	if err = r.client.RunRepeatableRead(ctx, func(ctx context.Context) error {
-		var stocks []models.StockItem
-		for _, item := range items {
-			stocks, err = r.GetStocks(ctx, item.SKU)
-			if err != nil {
-				return err
-			}
-
-			toReserve := uint64(item.Count)
-			for _, stock := range stocks {
-				if stock.Count > toReserve {
-					if err = r.createReservation(ctx, orderID, stock.WarehouseID, item.SKU, toReserve); err != nil {
-						return err
-					}
-
-					if err = r.updateStock(ctx, stock.WarehouseID, item.SKU, stock.Count-toReserve); err != nil {
-						return err
-					}
-
-					toReserve = 0
-					break
-				}
-
-				if stock.Count == toReserve {
-					if err = r.createReservation(ctx, orderID, stock.WarehouseID, item.SKU, toReserve); err != nil {
-						return err
-					}
-
-					if stock.Count-toReserve == 0 {
-						if err = r.deleteStock(ctx, stock.WarehouseID, item.SKU); err != nil {
-							return err
-						}
-					}
-
-					toReserve = 0
-					break
-				}
-
-				if err = r.createReservation(ctx, orderID, stock.WarehouseID, item.SKU, stock.Count); err != nil {
-					return err
-				}
-
-				if err = r.updateStock(ctx, stock.WarehouseID, item.SKU, 0); err != nil {
-					return err
-				}
-
-				toReserve -= stock.Count
-			}
-
-			if toReserve > 0 {
-				ErrStockInsufficient := errors.New("stock insufficient")
-				return ErrStockInsufficient
-			}
-
-		}
-
-		if err = r.createOrderItems(ctx, orderID, items); err != nil {
-			return err
-		}
-
-		if err = r.updateOrderStatus(ctx, orderID, models.OrderStatusAwaitingPayment); err != nil {
-			return err
-		}
-
-		return nil
-	}); err != nil {
-		if updErr := r.updateOrderStatus(ctx, orderID, models.OrderStatusFailed); updErr != nil {
-			err = multierr.Append(err, errors.New("failed to update order status to 'failed'"))
-		}
-
-		return 0, err
+	q := pg.Query{
+		Name:     "loms.GetReservation",
+		QueryRaw: query,
 	}
 
-	return orderID, nil
+	var resItems []models.ReservationItem
+	if err = r.client.PG().ScanAllContext(ctx, &resItems, q, v...); err != nil {
+		return nil, err
+	}
+
+	return resItems, nil
 }
 
-func (r *repository) createOrder(ctx context.Context, userId int64) (int64, error) {
+func (r *repository) DeleteReservation(ctx context.Context, orderID int64) error {
+	builder := sq.Delete(tableReservation).
+		PlaceholderFormat(sq.Dollar).
+		Where(sq.Eq{"order_id": orderID})
+
+	query, v, err := builder.ToSql()
+	if err != nil {
+		return err
+	}
+
+	q := pg.Query{
+		Name:     "loms.DeleteReservation",
+		QueryRaw: query,
+	}
+
+	if _, err = r.client.PG().ExecContext(ctx, q, v...); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *repository) CreateOrder(ctx context.Context, user int64) (int64, error) {
 	builder := sq.Insert(tableOrder).
 		Columns("user_id", "status").
-		Values(userId, models.OrderStatusNew).
+		Values(user, models.OrderStatusNew).
 		Suffix("RETURNING order_id").
 		PlaceholderFormat(sq.Dollar)
 
@@ -157,7 +119,7 @@ func (r *repository) createOrder(ctx context.Context, userId int64) (int64, erro
 	return orderId, nil
 }
 
-func (r *repository) createOrderItems(ctx context.Context, orderID int64, items []models.Item) error {
+func (r *repository) CreateOrderItems(ctx context.Context, orderID int64, items []models.Item) error {
 	builder := sq.Insert(tableItems).
 		Columns("order_id", "sku", "count").
 		PlaceholderFormat(sq.Dollar)
@@ -172,7 +134,7 @@ func (r *repository) createOrderItems(ctx context.Context, orderID int64, items 
 	}
 
 	q := pg.Query{
-		Name:     "loms.createOrderItems",
+		Name:     "loms.CreateOrderItems",
 		QueryRaw: query,
 	}
 
@@ -183,7 +145,31 @@ func (r *repository) createOrderItems(ctx context.Context, orderID int64, items 
 	return nil
 }
 
-func (r *repository) updateOrderStatus(ctx context.Context, orderID int64, status string) error {
+func (r *repository) InsertStock(ctx context.Context, item models.ReservationItem) error {
+	builder := sq.Insert(tableStock).
+		Columns("warehouse_id", "sku", "count").
+		Values(item.WarehouseID, item.SKU, item.Count).
+		Suffix("ON CONFLICT (warehouse_id, sku) DO UPDATE SET count = stocks.count + ?", item.Count).
+		PlaceholderFormat(sq.Dollar)
+
+	query, v, err := builder.ToSql()
+	if err != nil {
+		return err
+	}
+
+	q := pg.Query{
+		Name:     "loms.InsertStock",
+		QueryRaw: query,
+	}
+
+	if _, err = r.client.PG().ExecContext(ctx, q, v...); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *repository) UpdateOrderStatus(ctx context.Context, orderID int64, status string) error {
 	builder :=
 		sq.Update(tableOrder).
 			Set("status", status).
@@ -196,7 +182,7 @@ func (r *repository) updateOrderStatus(ctx context.Context, orderID int64, statu
 	}
 
 	q := pg.Query{
-		Name:     "loms.updateOrderStatus",
+		Name:     "loms.UpdateOrderStatus",
 		QueryRaw: query,
 	}
 
@@ -207,7 +193,7 @@ func (r *repository) updateOrderStatus(ctx context.Context, orderID int64, statu
 	return nil
 }
 
-func (r *repository) createReservation(ctx context.Context, orderID, warID int64, sku uint32, count uint64) error {
+func (r *repository) CreateReservation(ctx context.Context, orderID, warID int64, sku uint32, count uint64) error {
 	builder := sq.Insert(tableReservation).
 		Columns("order_id", "warehouse_id", "sku", "count").
 		Values(orderID, warID, sku, count).
@@ -219,7 +205,7 @@ func (r *repository) createReservation(ctx context.Context, orderID, warID int64
 	}
 
 	q := pg.Query{
-		Name:     "loms.createReservation",
+		Name:     "loms.CreateReservation",
 		QueryRaw: query,
 	}
 
@@ -230,7 +216,7 @@ func (r *repository) createReservation(ctx context.Context, orderID, warID int64
 	return nil
 }
 
-func (r *repository) updateStock(ctx context.Context, warehouseID int64, sku uint32, count uint64) error {
+func (r *repository) UpdateStock(ctx context.Context, warehouseID int64, sku uint32, count uint64) error {
 	builder :=
 		sq.Update(tableStock).
 			Set("count", count).
@@ -243,7 +229,7 @@ func (r *repository) updateStock(ctx context.Context, warehouseID int64, sku uin
 	}
 
 	q := pg.Query{
-		Name:     "loms.updateStock",
+		Name:     "loms.UpdateStock",
 		QueryRaw: query,
 	}
 
@@ -254,7 +240,7 @@ func (r *repository) updateStock(ctx context.Context, warehouseID int64, sku uin
 	return nil
 }
 
-func (r *repository) deleteStock(ctx context.Context, warehouseID int64, sku uint32) error {
+func (r *repository) DeleteStock(ctx context.Context, warehouseID int64, sku uint32) error {
 	builder := sq.Delete(tableStock).
 		Where(sq.Eq{"warehouse_id": warehouseID, "sku": sku}).
 		PlaceholderFormat(sq.Dollar)
@@ -265,7 +251,7 @@ func (r *repository) deleteStock(ctx context.Context, warehouseID int64, sku uin
 	}
 
 	q := pg.Query{
-		Name:     "loms.deleteStock",
+		Name:     "loms.DeleteStock",
 		QueryRaw: query,
 	}
 

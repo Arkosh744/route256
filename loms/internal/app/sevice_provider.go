@@ -64,7 +64,7 @@ func (s *serviceProvider) GetRepository(ctx context.Context) service.Repository 
 
 func (s *serviceProvider) GetLomsService(ctx context.Context) LomsV1.Service {
 	if s.service == nil {
-		s.service = service.New(s.GetRepository(ctx))
+		s.service = service.New(s.GetRepository(ctx), s.GetPGClient(ctx))
 	}
 
 	return s.service

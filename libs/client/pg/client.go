@@ -15,8 +15,11 @@ var _ Client = (*client)(nil)
 
 type Client interface {
 	Close() error
+	TxManager
 	PG() PG
+}
 
+type TxManager interface {
 	RunRepeatableRead(ctx context.Context, fx func(ctxTX context.Context) error) error
 }
 
