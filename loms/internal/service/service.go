@@ -26,16 +26,20 @@ func New(repo Repository, tx pg.TxManager) *service {
 }
 
 type Repository interface {
+	GetOrder(ctx context.Context, orderID int64) (*models.Order, error)
+	GetOrderItems(ctx context.Context, orderID int64) ([]models.Item, error)
 	CreateOrder(ctx context.Context, user int64) (int64, error)
-	CreateOrderItems(ctx context.Context, orderID int64, items []models.Item) error
 	UpdateOrderStatus(ctx context.Context, orderID int64, status string) error
-	CreateReservation(ctx context.Context, orderID, warID int64, sku uint32, count uint64) error
+	CreateOrderItems(ctx context.Context, orderID int64, items []models.Item) error
+
 	GetReservations(ctx context.Context, orderID int64) ([]models.ReservationItem, error)
+	CreateReservation(ctx context.Context, orderID, warID int64, sku uint32, count uint64) error
 	DeleteReservation(ctx context.Context, orderID int64) error
+
+	GetStocks(ctx context.Context, sku uint32) ([]models.StockItem, error)
 	InsertStock(ctx context.Context, item models.ReservationItem) error
 	UpdateStock(ctx context.Context, warehouseID int64, sku uint32, count uint64) error
 	DeleteStock(ctx context.Context, warehouseID int64, sku uint32) error
-	GetStocks(ctx context.Context, sku uint32) ([]models.StockItem, error)
 }
 
 // orderStorage is a storage for orders to cancel them after timeout.

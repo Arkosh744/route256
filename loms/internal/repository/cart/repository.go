@@ -72,6 +72,55 @@ func (r *repository) GetReservations(ctx context.Context, orderID int64) ([]mode
 	return resItems, nil
 }
 
+func (r *repository) GetOrder(ctx context.Context, orderID int64) (*models.Order, error) {
+	builder := sq.Select("user_id", "status").
+		From(tableOrder).
+		PlaceholderFormat(sq.Dollar).
+		Where(sq.Eq{"order_id": orderID}).
+		Limit(1)
+
+	query, v, err := builder.ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	q := pg.Query{
+		Name:     "loms.GetOrder",
+		QueryRaw: query,
+	}
+
+	var items models.Order
+	if err := r.client.PG().ScanOneContext(ctx, &items, q, v...); err != nil {
+		return nil, err
+	}
+
+	return &items, nil
+}
+
+func (r *repository) GetOrderItems(ctx context.Context, orderID int64) ([]models.Item, error) {
+	builder := sq.Select("sku", "count").
+		From(tableItems).
+		PlaceholderFormat(sq.Dollar).
+		Where(sq.Eq{"order_id": orderID})
+
+	query, v, err := builder.ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	q := pg.Query{
+		Name:     "loms.GetOrderItems",
+		QueryRaw: query,
+	}
+
+	var items []models.Item
+	if err := r.client.PG().ScanAllContext(ctx, &items, q, v...); err != nil {
+		return nil, err
+	}
+
+	return items, nil
+}
+
 func (r *repository) DeleteReservation(ctx context.Context, orderID int64) error {
 	builder := sq.Delete(tableReservation).
 		PlaceholderFormat(sq.Dollar).
