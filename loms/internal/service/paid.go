@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 
 	"route256/libs/log"
 	"route256/loms/internal/models"
@@ -23,6 +25,19 @@ func (s *service) Paid(ctx context.Context, orderID int64) error {
 
 func (s *service) payOrder(ctx context.Context, orderID int64) error {
 	if err := s.txManager.RunRepeatableRead(ctx, func(ctx context.Context) error {
+		order, err := s.repo.GetOrder(ctx, orderID)
+		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return ErrOrderNotFound
+			}
+
+			return err
+		}
+
+		if order.Status != models.OrderStatusAwaitingPayment {
+			return ErrInvalidOrderStatus
+		}
+
 		if err := s.repo.UpdateOrderStatus(ctx, orderID, models.OrderStatusPaid); err != nil {
 			log.Errorf("failed to update order %d status to 'canceled': %v", orderID, err)
 
