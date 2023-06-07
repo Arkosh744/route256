@@ -5,7 +5,6 @@ import (
 	"errors"
 	"time"
 
-	"route256/libs/log"
 	"route256/loms/internal/models"
 
 	"go.uber.org/multierr"
@@ -131,47 +130,20 @@ func (s *service) orderTimeoutFunc(ctx context.Context, orderID int64) func() {
 		order, ok := s.storage.storage[orderID]
 		s.storage.mu.Unlock()
 
+		if !ok {
+			return
+		}
+
 		if ok && order.Paid {
-			return
-		}
-
-		if err := s.txManager.RunRepeatableRead(ctx, func(ctx context.Context) error {
-			if err := s.repo.UpdateOrderStatus(ctx, orderID, models.OrderStatusCanceled); err != nil {
-				log.Errorf("failed to update order %d status to 'canceled': %v", orderID, err)
-
-				return err
-			}
-
-			reserv, err := s.repo.GetReservations(ctx, orderID)
-			if err != nil {
-				log.Errorf("failed to get reservations for order %d: %v", orderID, err)
-
-				return err
-			}
-
-			for i := range reserv {
-				if err = s.repo.InsertStock(ctx, reserv[i]); err != nil {
-					log.Errorf("failed to insert stock back from order %d: %v", orderID, err)
-
-					return err
-				}
-			}
-
-			if err = s.repo.DeleteReservation(ctx, orderID); err != nil {
-				log.Errorf("failed to delete reservation for order %d: %v", orderID, err)
-
-				return err
-			}
-
-			return nil
-		}); err != nil {
-			log.Errorf("failed to cancel order %d: %v", orderID, err)
+			s.storage.deleteFromStorage(orderID)
 
 			return
 		}
 
-		s.storage.mu.Lock()
-		delete(s.storage.storage, orderID)
-		s.storage.mu.Unlock()
+		if err := s.Cancel(ctx, orderID); err != nil {
+			return
+		}
+
+		s.storage.deleteFromStorage(orderID)
 	}
 }

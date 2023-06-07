@@ -51,3 +51,10 @@ type orderStatus struct {
 }
 
 const orderTimeout = 10 * time.Minute
+
+func (s *orderStorage) deleteFromStorage(orderID int64) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	delete(s.storage, orderID)
+}
