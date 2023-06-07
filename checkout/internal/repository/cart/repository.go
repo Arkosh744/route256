@@ -3,7 +3,6 @@ package cart
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"route256/checkout/internal/models"
 	"route256/libs/client/pg"
@@ -64,8 +63,6 @@ func (r *repository) GetCount(ctx context.Context, user int64, sku uint32) (uint
 
 	var count uint16
 	if err = r.client.PG().ScanOneContext(ctx, &count, q, v...); err != nil && !errors.Is(err, pgx.ErrNoRows) {
-		fmt.Println(err)
-
 		return 0, err
 	}
 
@@ -89,8 +86,6 @@ func (r *repository) GetUserCart(ctx context.Context, user int64) ([]models.Item
 
 	var items []models.ItemData
 	if err = r.client.PG().ScanAllContext(ctx, &items, q, v...); err != nil && !errors.Is(err, pgx.ErrNoRows) {
-		fmt.Println(err)
-
 		return nil, err
 	}
 
@@ -106,6 +101,7 @@ func (r *repository) DeleteFromCart(ctx context.Context, user int64, item *model
 
 		if count < item.Count {
 			ErrStockInsufficient := errors.New("stock insufficient")
+
 			return ErrStockInsufficient
 		}
 
@@ -166,7 +162,7 @@ func (r *repository) removeItemsFromCart(ctx context.Context, user int64, count 
 	return nil
 }
 
-func (r *repository) DeleteUserCart(ctx context.Context, user int64) error  {
+func (r *repository) DeleteUserCart(ctx context.Context, user int64) error {
 	builder := sq.Delete(tableName).
 		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{"user_id": user})

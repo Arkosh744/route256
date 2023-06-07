@@ -30,8 +30,8 @@ type serviceProvider struct {
 	cartImpl *checkoutV1.Implementation
 
 	pgClient pg.Client
-	loms service.LomsClient
-	ps   service.PSClient
+	loms     service.LomsClient
+	ps       service.PSClient
 }
 
 func newServiceProvider(_ context.Context) *serviceProvider {

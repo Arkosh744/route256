@@ -41,7 +41,7 @@ func (r *repository) GetStocks(ctx context.Context, sku uint32) ([]models.StockI
 	}
 
 	var stocks []models.StockItem
-	if err = r.client.PG().ScanAllContext(ctx, &stocks, q, v...); err != nil {
+	if err := r.client.PG().ScanAllContext(ctx, &stocks, q, v...); err != nil {
 		return nil, err
 	}
 
@@ -65,7 +65,7 @@ func (r *repository) GetReservations(ctx context.Context, orderID int64) ([]mode
 	}
 
 	var resItems []models.ReservationItem
-	if err = r.client.PG().ScanAllContext(ctx, &resItems, q, v...); err != nil {
+	if err := r.client.PG().ScanAllContext(ctx, &resItems, q, v...); err != nil {
 		return nil, err
 	}
 
@@ -112,7 +112,7 @@ func (r *repository) CreateOrder(ctx context.Context, user int64) (int64, error)
 	}
 
 	var orderId int64
-	if err = r.client.PG().ScanOneContext(ctx, &orderId, q, v...); err != nil {
+	if err := r.client.PG().ScanOneContext(ctx, &orderId, q, v...); err != nil {
 		return 0, err
 	}
 
@@ -170,11 +170,10 @@ func (r *repository) InsertStock(ctx context.Context, item models.ReservationIte
 }
 
 func (r *repository) UpdateOrderStatus(ctx context.Context, orderID int64, status string) error {
-	builder :=
-		sq.Update(tableOrder).
-			Set("status", status).
-			Where(sq.Eq{"order_id": orderID}).
-			PlaceholderFormat(sq.Dollar)
+	builder := sq.Update(tableOrder).
+		Set("status", status).
+		Where(sq.Eq{"order_id": orderID}).
+		PlaceholderFormat(sq.Dollar)
 
 	query, v, err := builder.ToSql()
 	if err != nil {
@@ -217,11 +216,10 @@ func (r *repository) CreateReservation(ctx context.Context, orderID, warID int64
 }
 
 func (r *repository) UpdateStock(ctx context.Context, warehouseID int64, sku uint32, count uint64) error {
-	builder :=
-		sq.Update(tableStock).
-			Set("count", count).
-			Where(sq.Eq{"warehouse_id": warehouseID, "sku": sku}).
-			PlaceholderFormat(sq.Dollar)
+	builder := sq.Update(tableStock).
+		Set("count", count).
+		Where(sq.Eq{"warehouse_id": warehouseID, "sku": sku}).
+		PlaceholderFormat(sq.Dollar)
 
 	query, v, err := builder.ToSql()
 	if err != nil {

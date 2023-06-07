@@ -15,8 +15,10 @@ func (s *cartService) ListCart(ctx context.Context, user int64) (*models.CartInf
 	items := make([]models.Item, 0, len(userItems))
 
 	var totalPrice uint32
+
 	for i := range userItems {
 		var res *models.ItemInfo
+
 		res, err = s.psClient.GetProduct(ctx, userItems[i].SKU)
 		if err != nil {
 			return nil, err

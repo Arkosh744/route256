@@ -22,11 +22,13 @@ func (s *cartService) AddToCart(ctx context.Context, user int64, sku uint32, cou
 	}
 
 	var inStock bool
+
 	counter := int64(cartCount) + int64(count)
 	for _, stock := range stocks {
 		counter -= int64(stock.Count)
 		if counter <= 0 {
 			inStock = true
+
 			break
 		}
 	}
@@ -35,7 +37,7 @@ func (s *cartService) AddToCart(ctx context.Context, user int64, sku uint32, cou
 		return ErrStockInsufficient
 	}
 
-	if err = s.repo.AddToCart(ctx, user, &models.ItemData{SKU: sku, Count: count}); err != nil {
+	if err := s.repo.AddToCart(ctx, user, &models.ItemData{SKU: sku, Count: count}); err != nil {
 		return err
 	}
 

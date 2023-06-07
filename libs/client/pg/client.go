@@ -31,8 +31,10 @@ func NewClient(ctx context.Context, pgCfg *pgxpool.Config) (Client, error) {
 	dbc, err := pgxpool.ConnectConfig(ctx, pgCfg)
 	if err != nil {
 		log.Errorf("failed to connect to postgres", zap.Error(err))
+
 		return nil, err
 	}
+
 	log.Info("pg connected successfully")
 
 	return &client{pg: &pg{pgxPool: dbc}}, nil

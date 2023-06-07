@@ -4,7 +4,4 @@ import (
 	"errors"
 )
 
-var (
-	ErrStockInsufficient = errors.New("stock insufficient")
-
-)
+var ErrStockInsufficient = errors.New("stock insufficient")

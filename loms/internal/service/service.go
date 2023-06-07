@@ -38,16 +38,16 @@ type Repository interface {
 	GetStocks(ctx context.Context, sku uint32) ([]models.StockItem, error)
 }
 
-// orderStorage is a storage for orders to cancel them after timeout
-// I think we should use redis for this later
+// orderStorage is a storage for orders to cancel them after timeout.
 type orderStorage struct {
 	storage map[int64]*orderStatus
 	mu      sync.Mutex
 }
 
 type orderStatus struct {
-	Paid  bool
-	Timer *time.Timer
+	Paid      bool
+	Timer     *time.Timer
+	ctxCancel context.CancelFunc
 }
 
 const orderTimeout = 10 * time.Minute
