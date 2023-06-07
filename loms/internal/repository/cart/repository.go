@@ -24,6 +24,7 @@ const (
 	tableStock       = "stocks"
 )
 
+//nolint:dupl //similar methods
 func (r *repository) GetStocks(ctx context.Context, sku uint32) ([]models.StockItem, error) {
 	builder := sq.Select("warehouse_id", "count").
 		From(tableStock).
@@ -97,6 +98,7 @@ func (r *repository) GetOrder(ctx context.Context, orderID int64) (*models.Order
 	return &items, nil
 }
 
+//nolint:dupl //similar methods
 func (r *repository) GetOrderItems(ctx context.Context, orderID int64) ([]models.Item, error) {
 	builder := sq.Select("sku", "count").
 		From(tableItems).

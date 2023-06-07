@@ -49,6 +49,7 @@ func (s *service) cancelOrderAndRestock(ctx context.Context, orderID int64) erro
 
 			return err
 		}
+
 		return nil
 	}); err != nil {
 		log.Errorf("failed to cancel order %d: %v", orderID, err)

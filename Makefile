@@ -67,7 +67,9 @@ build-all:
 	cd notifications && GOOS=linux GOARCH=amd64 make build
 
 run-all: build-all
-	sudo docker compose up --force-recreate --build
+	sudo docker compose up --force-recreate --build -d
+	cd checkout && make local-migration-up
+	cd loms && make local-migration-up
 	#docker-compose up --force-recreate --build
 
 test:

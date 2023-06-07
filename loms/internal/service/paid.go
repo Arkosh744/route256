@@ -34,6 +34,7 @@ func (s *service) payOrder(ctx context.Context, orderID int64) error {
 
 			return err
 		}
+
 		return nil
 	}); err != nil {
 		log.Errorf("failed to cancel order %d: %v", orderID, err)
