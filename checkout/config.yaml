@@ -22,7 +22,10 @@ services:
   loms: "localhost:50053"
   productService: "route256.pavl.uk:8082"
 
-workers: 5
+workers: 1
+
+requestLimit: 2
+requestLimitPeriod: 1s
 
 log:
   preset: "dev"

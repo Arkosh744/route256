@@ -18,13 +18,13 @@ type Result[Out any] struct {
 }
 
 type Pool[In, Out any] struct {
-	maxWorkers int
+	workers int
 
-	taskChan chan Task[In, Out]
-	resChan  chan Result[Out]
+	taskCh   chan Task[In, Out]
+	resultCh chan Result[Out]
 	results  []Result[Out]
 
-	workWg   sync.WaitGroup
+	taskWg   sync.WaitGroup
 	resultWg sync.WaitGroup
 
 	closeWorking sync.Once
@@ -37,9 +37,9 @@ func NewPool[In, Out any](ctx context.Context, maxWorkers int) *Pool[In, Out] {
 	}
 
 	p := &Pool[In, Out]{
-		maxWorkers: maxWorkers,
-		taskChan:   make(chan Task[In, Out]),
-		resChan:    make(chan Result[Out]),
+		workers:  maxWorkers,
+		taskCh: make(chan Task[In, Out]),
+		resultCh:  make(chan Result[Out]),
 	}
 
 	go p.run(ctx)
@@ -47,13 +47,13 @@ func NewPool[In, Out any](ctx context.Context, maxWorkers int) *Pool[In, Out] {
 	return p
 }
 
-func (p *Pool[In, Out]) SubmitOne(fn WorkerFunc[In, Out], task In) {
-	p.taskChan <- Task[In, Out]{fn, task}
+func (p *Pool[In, Out]) SendOne(fn WorkerFunc[In, Out], arg In) {
+	p.taskCh <- Task[In, Out]{fn, arg}
 }
 
-func (p *Pool[In, Out]) SubmitMany(fn WorkerFunc[In, Out], tasks []In) {
-	for _, task := range tasks {
-		p.SubmitOne(fn, task)
+func (p *Pool[In, Out]) SendMany(fn WorkerFunc[In, Out], args []In) {
+	for _, task := range args {
+		p.SendOne(fn, task)
 	}
 }
 
@@ -62,21 +62,21 @@ func (p *Pool[In, Out]) GetResult() []Result[Out] {
 }
 
 func (p *Pool[In, Out]) run(ctx context.Context) {
-	for i := 0; i < p.maxWorkers; i++ {
-		p.workWg.Add(1)
+	for i := 0; i < p.workers; i++ {
+		p.taskWg.Add(1)
 
-		go work(ctx, &p.workWg, p.taskChan, p.resChan)
+		go work(ctx, &p.taskWg, p.taskCh, p.resultCh)
 	}
 
 	p.resultWg.Add(1)
-
-	go p.accumulateResult()
+	// reading results in separate goroutine until taskCh is closed.
+	go p.getResults()
 }
 
-func (p *Pool[In, Out]) accumulateResult() {
+func (p *Pool[In, Out]) getResults() {
 	defer p.resultWg.Done()
 
-	for res := range p.resChan {
+	for res := range p.resultCh {
 		p.results = append(p.results, res)
 	}
 }
@@ -100,7 +100,7 @@ func work[In, Out any](
 		case <-ctx.Done():
 			break
 		default:
-			// Execute the task and send the result to resChan.
+			// Execute the task and send the result to resultCh.
 			value, err := task.fn(ctx, task.arg)
 			resChan <- Result[Out]{value, err}
 		}
@@ -108,14 +108,16 @@ func work[In, Out any](
 }
 
 func (p *Pool[In, Out]) Wait() {
+	// close taskCh to stop all workers and wait for them to finish.
 	p.closeWorking.Do(func() {
-		close(p.taskChan)
+		close(p.taskCh)
 	})
 
-	p.workWg.Wait()
+	p.taskWg.Wait()
 
+	// close resultCh to stop getResults goroutine and wait for it.
 	p.closeRes.Do(func() {
-		close(p.resChan)
+		close(p.resultCh)
 	})
 
 	p.resultWg.Wait()

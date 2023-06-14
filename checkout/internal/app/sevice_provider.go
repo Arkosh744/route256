@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"route256/libs/rate_limiter"
 
 	"route256/checkout/internal/clients/loms"
 	"route256/checkout/internal/clients/ps"
@@ -93,6 +94,12 @@ func (s *serviceProvider) GetLomsClient(ctx context.Context) service.LomsClient 
 	return s.loms
 }
 
+func (s *serviceProvider) GetRateLimiter() *rate_limiter.SlidingWindow {
+	rl := rate_limiter.NewSlidingWindow(config.AppConfig.ReqLimit, config.AppConfig.ReqLimitPeriod)
+
+	return rl
+}
+
 //nolint:dupl // we initialize clients in the same way
 func (s *serviceProvider) GetPSClient(ctx context.Context) service.PSClient {
 	if s.ps == nil {
@@ -108,7 +115,8 @@ func (s *serviceProvider) GetPSClient(ctx context.Context) service.PSClient {
 		closer.Add(conn.Close)
 
 		psClient := productV1.NewProductServiceClient(conn)
-		s.ps = ps.New(psClient)
+		
+		s.ps = ps.New(psClient, s.GetRateLimiter())
 
 		log.Infof("ps client created and connected %s", config.AppConfig.Services.ProductService)
 	}

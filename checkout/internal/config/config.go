@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"time"
 
 	"gopkg.in/yaml.v3"
 )
@@ -46,6 +47,10 @@ type Config struct {
 
 	Workers int `yaml:"workers"`
 
+	ReqLimit          int    `yaml:"requestLimit"`
+	ReqLimitPeriodRaw string `yaml:"requestLimitPeriod"`
+	ReqLimitPeriod    time.Duration
+
 	Log struct {
 		Preset string `yaml:"preset"`
 	} `yaml:"log"`
@@ -62,6 +67,11 @@ func Init(_ context.Context) error {
 	err = yaml.Unmarshal(rawYaml, &AppConfig)
 	if err != nil {
 		return fmt.Errorf("parse config file: %w", err)
+	}
+
+	err = AppConfig.getReqLimitPeriod()
+	if err != nil {
+		return fmt.Errorf("get request limit period: %w", err)
 	}
 
 	return nil
@@ -82,4 +92,15 @@ func (c *Config) GetSwaggerAddr() string {
 func (c *Config) GetPostgresDSN() string {
 	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		c.Postgres.Host, c.Postgres.Port, c.Postgres.User, c.Postgres.Password, c.Postgres.Database)
+}
+
+func (c *Config) getReqLimitPeriod() error {
+	dur, err := time.ParseDuration(c.ReqLimitPeriodRaw)
+	if err != nil {
+		return fmt.Errorf("parse request limit period: %w", err)
+	}
+
+	c.ReqLimitPeriod = dur
+
+	return nil
 }

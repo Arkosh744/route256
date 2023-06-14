@@ -19,7 +19,7 @@ func (s *cartService) ListCart(ctx context.Context, user int64) (*models.CartInf
 
 	pool := wp.NewPool[models.ItemData, models.Item](ctx, config.AppConfig.Workers)
 
-	pool.SubmitMany(func(ctx context.Context, item models.ItemData) (models.Item, error) {
+	pool.SendMany(func(ctx context.Context, item models.ItemData) (models.Item, error) {
 		res, err := s.psClient.GetProduct(ctx, item.SKU)
 		if err != nil {
 			// if we get error from PS, we cancel all other requests
