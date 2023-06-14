@@ -21,8 +21,7 @@ func (s *service) Create(ctx context.Context, user int64, items []models.Item) (
 			return txErr
 		}
 
-		//nolint:contextcheck // we start new context inside with cancel func
-		s.startPaymentTimeout(orderID)
+		s.startPaymentTimeout(ctx, orderID)
 
 		return nil
 	}); err != nil {
@@ -112,8 +111,8 @@ func (s *service) updateStockAndCreateReservation(
 	return nil
 }
 
-func (s *service) startPaymentTimeout(orderID int64) {
-	timerCtx, cancel := context.WithCancel(context.Background())
+func (s *service) startPaymentTimeout(ctx context.Context, orderID int64) {
+	timerCtx, cancel := context.WithCancel(ctx)
 
 	s.storage.mu.Lock()
 	defer s.storage.mu.Unlock()

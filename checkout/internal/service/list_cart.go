@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+
 	"route256/checkout/internal/models"
 )
 
@@ -13,8 +14,9 @@ func (s *cartService) ListCart(ctx context.Context, user int64) (*models.CartInf
 
 	results := s.psClient.GetProducts(ctx, userItems)
 
-	items := make([]models.Item, 0, len(userItems))
 	var totalPrice uint32
+
+	items := make([]models.Item, 0, len(userItems))
 
 	for i := range results {
 		if results[i].Err != nil {
@@ -32,4 +34,3 @@ func (s *cartService) ListCart(ctx context.Context, user int64) (*models.CartInf
 		TotalPrice: totalPrice,
 	}, nil
 }
-

@@ -22,7 +22,6 @@ func NewSlidingWindow(limit int, interval time.Duration) *SlidingWindow {
 		interval: interval,
 		lastTime: time.Now(),
 	}
-
 }
 
 func (l *SlidingWindow) Allow() bool {
@@ -47,6 +46,7 @@ func (l *SlidingWindow) Allow() bool {
 	}
 
 	l.curCount++
+
 	return true
 }
 

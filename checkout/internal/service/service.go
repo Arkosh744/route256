@@ -3,6 +3,7 @@ package service
 
 import (
 	"context"
+
 	wp "route256/libs/worker_pool"
 
 	"route256/checkout/internal/models"
@@ -35,6 +36,9 @@ type LomsClient interface {
 	CreateOrder(ctx context.Context, user int64, items []models.ItemData) (int64, error)
 }
 
+// ItemsResult is a workaround to use mockgen with generic variable.
+type ItemsResult = []wp.Result[models.Item]
+
 type PSClient interface {
-	GetProducts(ctx context.Context, userItems []models.ItemData) []wp.Result[models.Item]
+	GetProducts(ctx context.Context, userItems []models.ItemData) ItemsResult
 }

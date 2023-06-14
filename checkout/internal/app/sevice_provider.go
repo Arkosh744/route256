@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+
 	"route256/libs/rate_limiter"
 
 	"route256/checkout/internal/clients/loms"
@@ -71,7 +72,6 @@ func (s *serviceProvider) GetCartRepo(ctx context.Context) service.Repository {
 	return s.repo
 }
 
-//nolint:dupl // we initialize clients in the same way
 func (s *serviceProvider) GetLomsClient(ctx context.Context) service.LomsClient {
 	if s.loms == nil {
 		conn, err := grpc.DialContext(
@@ -100,7 +100,6 @@ func (s *serviceProvider) GetRateLimiter() *rate_limiter.SlidingWindow {
 	return rl
 }
 
-//nolint:dupl // we initialize clients in the same way
 func (s *serviceProvider) GetPSClient(ctx context.Context) service.PSClient {
 	if s.ps == nil {
 		conn, err := grpc.DialContext(
@@ -115,7 +114,7 @@ func (s *serviceProvider) GetPSClient(ctx context.Context) service.PSClient {
 		closer.Add(conn.Close)
 
 		psClient := productV1.NewProductServiceClient(conn)
-		
+
 		s.ps = ps.New(psClient, s.GetRateLimiter())
 
 		log.Infof("ps client created and connected %s", config.AppConfig.Services.ProductService)
