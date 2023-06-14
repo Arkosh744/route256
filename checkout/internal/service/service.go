@@ -3,6 +3,7 @@ package service
 
 import (
 	"context"
+	wp "route256/libs/worker_pool"
 
 	"route256/checkout/internal/models"
 )
@@ -35,5 +36,5 @@ type LomsClient interface {
 }
 
 type PSClient interface {
-	GetProduct(ctx context.Context, sku uint32) (*models.ItemInfo, error)
+	GetProducts(ctx context.Context, userItems []models.ItemData) []wp.Result[models.Item]
 }

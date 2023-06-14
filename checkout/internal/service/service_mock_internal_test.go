@@ -184,9 +184,9 @@ func (m *MockPSClient) EXPECT() *MockPSClientMockRecorder {
 }
 
 // GetProduct mocks base method.
-func (m *MockPSClient) GetProduct(ctx context.Context, sku uint32) (*models.ItemInfo, error) {
+func (m *MockPSClient) getProduct(ctx context.Context, sku uint32) (*models.ItemInfo, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetProduct", ctx, sku)
+	ret := m.ctrl.Call(m, "getProduct", ctx, sku)
 	ret0, _ := ret[0].(*models.ItemInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
@@ -195,5 +195,5 @@ func (m *MockPSClient) GetProduct(ctx context.Context, sku uint32) (*models.Item
 // GetProduct indicates an expected call of GetProduct.
 func (mr *MockPSClientMockRecorder) GetProduct(ctx, sku interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProduct", reflect.TypeOf((*MockPSClient)(nil).GetProduct), ctx, sku)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "getProduct", reflect.TypeOf((*MockPSClient)(nil).getProduct), ctx, sku)
 }

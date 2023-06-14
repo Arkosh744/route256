@@ -12,8 +12,8 @@ type SlidingWindow struct {
 
 	mu sync.Mutex
 
-	prevCount    int
-	currentCount int
+	prevCount int
+	curCount  int
 }
 
 func NewSlidingWindow(limit int, interval time.Duration) *SlidingWindow {
@@ -33,19 +33,30 @@ func (l *SlidingWindow) Allow() bool {
 	elapsed := now.Sub(l.lastTime)
 
 	if elapsed >= l.interval {
-		l.prevCount = l.currentCount
-		l.currentCount = 0
+		l.prevCount = l.curCount
+		l.curCount = 0
 		l.lastTime = now
 	}
 
 	slidingWindowCount := (float64(l.prevCount) * (l.interval.Seconds() - elapsed.Seconds())) / l.interval.Seconds()
 
-	curCount := l.currentCount + int(slidingWindowCount)
+	curCount := l.curCount + int(slidingWindowCount)
 
 	if curCount >= l.limit {
 		return false
 	}
 
-	l.currentCount++
+	l.curCount++
 	return true
+}
+
+func (l *SlidingWindow) Wait() {
+	for {
+		if l.Allow() {
+			break
+		}
+
+		// Because we have a sliding window, we will wait for a half of the period and retry
+		time.Sleep(l.interval / 2)
+	}
 }

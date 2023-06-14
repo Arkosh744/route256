@@ -38,8 +38,8 @@ func NewPool[In, Out any](ctx context.Context, maxWorkers int) *Pool[In, Out] {
 
 	p := &Pool[In, Out]{
 		workers:  maxWorkers,
-		taskCh: make(chan Task[In, Out]),
-		resultCh:  make(chan Result[Out]),
+		taskCh:   make(chan Task[In, Out]),
+		resultCh: make(chan Result[Out]),
 	}
 
 	go p.run(ctx)

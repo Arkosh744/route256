@@ -7,8 +7,8 @@ import (
 	"route256/checkout/internal/models"
 	"route256/libs/log"
 	"route256/libs/rate_limiter"
+	wp "route256/libs/worker_pool"
 	productV1 "route256/pkg/product_v1"
-	"time"
 )
 
 type client struct {
@@ -23,17 +23,11 @@ func New(ps productV1.ProductServiceClient, rl *rate_limiter.SlidingWindow) *cli
 	}
 }
 
-func (c *client) GetProduct(ctx context.Context, sku uint32) (*models.ItemInfo, error) {
+func (c *client) getProduct(ctx context.Context, sku uint32) (*models.ItemInfo, error) {
 	log.Infof("get product from ps: sku %d", sku)
 
-	for {
-		if c.rl.Allow() {
-			break
-		}
-
-		// Because we have a sliding window, we will wait for a half of the period and retry
-		time.Sleep(config.AppConfig.ReqLimitPeriod / 2)
-	}
+	// waiting for allow from rate limiter
+	c.rl.Wait()
 
 	res, err := c.psClient.GetProduct(ctx, &productV1.GetProductRequest{
 		Token: config.AppConfig.Token,
@@ -44,4 +38,37 @@ func (c *client) GetProduct(ctx context.Context, sku uint32) (*models.ItemInfo, 
 	}
 
 	return converter.DescToItemBase(res), nil
+}
+
+func (c *client) GetProducts(ctx context.Context, userItems []models.ItemData) []wp.Result[models.Item] {
+	ctx, cancel := context.WithCancel(ctx)
+
+	pool := wp.NewPool[models.ItemData, models.Item](ctx, config.AppConfig.Workers)
+
+	pool.SendMany(func(ctx context.Context, item models.ItemData) (models.Item, error) {
+		res, err := c.getProduct(ctx, item.SKU)
+		if err != nil {
+			// if we get error from PS, we cancel all other requests too
+			cancel()
+
+			return models.Item{}, err
+		}
+
+		resItem := models.Item{
+			ItemInfo: models.ItemInfo{
+				Name:  res.Name,
+				Price: res.Price,
+			},
+			ItemData: models.ItemData{
+				SKU:   item.SKU,
+				Count: item.Count,
+			},
+		}
+
+		return resItem, nil
+	}, userItems)
+
+	pool.Wait()
+
+	return pool.GetResult()
 }
