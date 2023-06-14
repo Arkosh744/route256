@@ -2,8 +2,9 @@ package service
 
 import (
 	"context"
-
+	"route256/checkout/internal/config"
 	"route256/checkout/internal/models"
+	wp "route256/libs/worker_pool"
 )
 
 func (s *cartService) ListCart(ctx context.Context, user int64) (*models.CartInfo, error) {
@@ -14,28 +15,46 @@ func (s *cartService) ListCart(ctx context.Context, user int64) (*models.CartInf
 
 	items := make([]models.Item, 0, len(userItems))
 
-	var totalPrice uint32
+	ctx, cancel := context.WithCancel(ctx)
 
-	for i := range userItems {
-		var res *models.ItemInfo
+	pool := wp.NewPool[models.ItemData, models.Item](ctx, config.AppConfig.Workers)
 
-		res, err = s.psClient.GetProduct(ctx, userItems[i].SKU)
+	pool.SubmitMany(func(ctx context.Context, item models.ItemData) (models.Item, error) {
+		res, err := s.psClient.GetProduct(ctx, item.SKU)
 		if err != nil {
-			return nil, err
+			// if we get error from PS, we cancel all other requests
+			cancel()
+			return models.Item{}, err
 		}
 
-		items = append(items, models.Item{
+		resItem := models.Item{
 			ItemInfo: models.ItemInfo{
 				Name:  res.Name,
 				Price: res.Price,
 			},
 			ItemData: models.ItemData{
-				SKU:   userItems[i].SKU,
-				Count: userItems[i].Count,
+				SKU:   item.SKU,
+				Count: item.Count,
 			},
-		})
+		}
 
-		totalPrice += res.Price * uint32(userItems[i].Count)
+		return resItem, nil
+	}, userItems)
+
+	pool.Wait()
+
+	results := pool.GetResult()
+
+	var totalPrice uint32
+	for i := range results {
+		if results[i].Err != nil {
+			// if we get any error from PS, we return error
+			return nil, results[i].Err
+		}
+
+		items = append(items, results[i].Value)
+
+		totalPrice += results[i].Value.Price * uint32(results[i].Value.Count)
 	}
 
 	return &models.CartInfo{

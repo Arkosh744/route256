@@ -44,6 +44,8 @@ type Config struct {
 		ProductService string `yaml:"productService"`
 	} `yaml:"services"`
 
+	Workers int `yaml:"workers"`
+
 	Log struct {
 		Preset string `yaml:"preset"`
 	} `yaml:"log"`
