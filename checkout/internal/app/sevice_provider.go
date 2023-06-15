@@ -3,8 +3,11 @@ package app
 import (
 	"context"
 
-	"route256/libs/rate_limiter"
-
+	"github.com/jackc/pgx/v4/pgxpool"
+	"go.uber.org/zap"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	checkoutV1 "route256/checkout/internal/api/checkout_v1"
 	"route256/checkout/internal/clients/loms"
 	"route256/checkout/internal/clients/ps"
 	"route256/checkout/internal/config"
@@ -13,15 +16,9 @@ import (
 	"route256/libs/client/pg"
 	"route256/libs/closer"
 	"route256/libs/log"
+	"route256/libs/rate_limiter"
 	lomsV1 "route256/pkg/loms_v1"
 	productV1 "route256/pkg/product_v1"
-
-	checkoutV1 "route256/checkout/internal/api/checkout_v1"
-
-	"github.com/jackc/pgx/v4/pgxpool"
-	"go.uber.org/zap"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 type serviceProvider struct {
@@ -101,7 +98,12 @@ func (s *serviceProvider) GetRateLimiter(_ context.Context) rate_limiter.RateLim
 }
 
 func (s *serviceProvider) GetRateLimiterWithPG(ctx context.Context) rate_limiter.RateLimiter {
-	rl, err := rate_limiter.NewSlidingWindowWithPG(ctx, config.AppConfig.RateLimit.Limit, config.AppConfig.RateLimit.Period, s.GetPGClient(ctx))
+	rl, err := rate_limiter.NewSlidingWindowWithPG(
+		ctx,
+		config.AppConfig.RateLimit.Limit,
+		config.AppConfig.RateLimit.Period,
+		s.GetPGClient(ctx),
+	)
 	if err != nil {
 		log.Fatalf("failed to create rate limiter with pg: %s", err)
 	}

@@ -3,12 +3,11 @@ package pg
 import (
 	"context"
 
-	"route256/libs/log"
-
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
+	"route256/libs/log"
 )
 
 var _ Client = (*client)(nil)
@@ -16,7 +15,7 @@ var _ Client = (*client)(nil)
 type Client interface {
 	TxManager
 	PG() PG
-	
+
 	Close() error
 }
 

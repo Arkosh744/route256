@@ -2,7 +2,6 @@ package rate_limiter
 
 import (
 	"context"
-	"route256/libs/client/pg"
 	"sync"
 	"time"
 )
@@ -16,8 +15,6 @@ type SlidingWindow struct {
 
 	prevCount int
 	curCount  int
-
-	pg pg.Client
 }
 
 func NewSlidingWindow(limit int, interval time.Duration) *SlidingWindow {

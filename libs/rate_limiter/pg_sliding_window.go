@@ -2,14 +2,15 @@ package rate_limiter
 
 import (
 	"context"
+	"sync"
+	"time"
+
 	sq "github.com/Masterminds/squirrel"
 	"route256/libs/client/pg"
 	"route256/libs/log"
-	"sync"
-	"time"
 )
 
-// SlidingWindowWithPG Do this realisation because store data in pg a bit strange ;).
+// SlidingWindowWithPG Do this realization because store data in pg a bit strange ;).
 type SlidingWindowWithPG struct {
 	limit    int
 	interval time.Duration
@@ -64,7 +65,7 @@ func (rl *SlidingWindowWithPG) getCount(ctx context.Context) error {
 	}{}
 
 	// this row should exist in db because we create it in migration
-	if err = rl.pg.PG().ScanOneContext(ctx, &rlData, q, v...); err != nil {
+	if err := rl.pg.PG().ScanOneContext(ctx, &rlData, q, v...); err != nil {
 		return err
 	}
 
@@ -95,6 +96,7 @@ func (rl *SlidingWindowWithPG) setCount(ctx context.Context) error {
 	if _, err = rl.pg.PG().ExecContext(ctx, q, v...); err != nil {
 		return err
 	}
+
 	return nil
 }
 

@@ -2,11 +2,11 @@ package service
 
 import (
 	"context"
-	"route256/libs/rate_limiter"
 	"sync"
 	"time"
 
 	"route256/libs/client/pg"
+	"route256/libs/rate_limiter"
 	"route256/loms/internal/models"
 )
 

@@ -3,12 +3,11 @@ package service
 import (
 	"context"
 	"errors"
-	"route256/libs/log"
 	"time"
 
-	"route256/loms/internal/models"
-
 	"go.uber.org/multierr"
+	"route256/libs/log"
+	"route256/loms/internal/models"
 )
 
 func (s *service) Create(ctx context.Context, user int64, items []models.Item) (int64, error) {
@@ -141,7 +140,7 @@ func (s *service) orderTimeoutFunc(ctx context.Context, orderID int64) func() {
 			return
 		}
 
-		//waiting for allow from rate limiter
+		// waiting for allow from rate limiter
 		if err := s.rl.Wait(ctx); err != nil {
 			log.Errorf("failed to wait for rate limiter: %v", err)
 
