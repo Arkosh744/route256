@@ -1,6 +1,8 @@
 package rate_limiter
 
 import (
+	"context"
+	"route256/libs/client/pg"
 	"sync"
 	"time"
 )
@@ -14,6 +16,8 @@ type SlidingWindow struct {
 
 	prevCount int
 	curCount  int
+
+	pg pg.Client
 }
 
 func NewSlidingWindow(limit int, interval time.Duration) *SlidingWindow {
@@ -24,39 +28,46 @@ func NewSlidingWindow(limit int, interval time.Duration) *SlidingWindow {
 	}
 }
 
-func (l *SlidingWindow) Allow() bool {
-	l.mu.Lock()
-	defer l.mu.Unlock()
+func (rl *SlidingWindow) Allow(_ context.Context) (bool, error) {
+	rl.mu.Lock()
+	defer rl.mu.Unlock()
 
 	now := time.Now()
-	elapsed := now.Sub(l.lastTime)
+	elapsed := now.Sub(rl.lastTime)
 
-	if elapsed >= l.interval {
-		l.prevCount = l.curCount
-		l.curCount = 0
-		l.lastTime = now
+	if elapsed >= rl.interval {
+		rl.prevCount = rl.curCount
+		rl.curCount = 0
+		rl.lastTime = now
 	}
 
-	slidingWindowCount := (float64(l.prevCount) * (l.interval.Seconds() - elapsed.Seconds())) / l.interval.Seconds()
+	slidingWindowCount := (float64(rl.prevCount) * (rl.interval.Seconds() - elapsed.Seconds())) / rl.interval.Seconds()
 
-	curCount := l.curCount + int(slidingWindowCount)
+	curCount := rl.curCount + int(slidingWindowCount)
 
-	if curCount >= l.limit {
-		return false
+	if curCount >= rl.limit {
+		return false, nil
 	}
 
-	l.curCount++
+	rl.curCount++
 
-	return true
+	return true, nil
 }
 
-func (l *SlidingWindow) Wait() {
+func (rl *SlidingWindow) Wait(ctx context.Context) error {
 	for {
-		if l.Allow() {
+		allow, err := rl.Allow(ctx)
+		if err != nil {
+			return err
+		}
+
+		if allow {
 			break
 		}
 
 		// Because we have a sliding window, we will wait for a half of the period and retry
-		time.Sleep(l.interval / 2)
+		time.Sleep(rl.interval / 2)
 	}
+
+	return nil
 }

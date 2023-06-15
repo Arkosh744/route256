@@ -94,8 +94,17 @@ func (s *serviceProvider) GetLomsClient(ctx context.Context) service.LomsClient 
 	return s.loms
 }
 
-func (s *serviceProvider) GetRateLimiter() *rate_limiter.SlidingWindow {
+func (s *serviceProvider) GetRateLimiter(_ context.Context) rate_limiter.RateLimiter {
 	rl := rate_limiter.NewSlidingWindow(config.AppConfig.ReqLimit, config.AppConfig.ReqLimitPeriod)
+
+	return rl
+}
+
+func (s *serviceProvider) GetRateLimiterWithPG(ctx context.Context) rate_limiter.RateLimiter {
+	rl, err := rate_limiter.NewSlidingWindowWithPG(ctx, config.AppConfig.ReqLimit, config.AppConfig.ReqLimitPeriod, s.GetPGClient(ctx))
+	if err != nil {
+		log.Fatalf("failed to create rate limiter with pg: %s", err)
+	}
 
 	return rl
 }
@@ -115,7 +124,7 @@ func (s *serviceProvider) GetPSClient(ctx context.Context) service.PSClient {
 
 		psClient := productV1.NewProductServiceClient(conn)
 
-		s.ps = ps.New(psClient, s.GetRateLimiter())
+		s.ps = ps.New(psClient, s.GetRateLimiterWithPG(ctx))
 
 		log.Infof("ps client created and connected %s", config.AppConfig.Services.ProductService)
 	}

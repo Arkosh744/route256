@@ -14,31 +14,14 @@ import (
 
 type client struct {
 	psClient productV1.ProductServiceClient
-	rl       *rate_limiter.SlidingWindow
+	rl       rate_limiter.RateLimiter
 }
 
-func New(ps productV1.ProductServiceClient, rl *rate_limiter.SlidingWindow) *client {
+func New(ps productV1.ProductServiceClient, rl rate_limiter.RateLimiter) *client {
 	return &client{
 		psClient: ps,
 		rl:       rl,
 	}
-}
-
-func (c *client) getProduct(ctx context.Context, sku uint32) (*models.ItemInfo, error) {
-	log.Infof("get product from ps: sku %d", sku)
-
-	// waiting for allow from rate limiter
-	c.rl.Wait()
-
-	res, err := c.psClient.GetProduct(ctx, &productV1.GetProductRequest{
-		Token: config.AppConfig.Token,
-		Sku:   sku,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return converter.DescToItemBase(res), nil
 }
 
 func (c *client) GetProducts(ctx context.Context, userItems []models.ItemData) []wp.Result[models.Item] {
@@ -72,4 +55,23 @@ func (c *client) GetProducts(ctx context.Context, userItems []models.ItemData) [
 	pool.Wait()
 
 	return pool.GetResult()
+}
+
+func (c *client) getProduct(ctx context.Context, sku uint32) (*models.ItemInfo, error) {
+	log.Infof("get product from ps: sku %d", sku)
+
+	// waiting for allow from rate limiter
+	if err := c.rl.Wait(ctx); err != nil {
+		return nil, err
+	}
+
+	res, err := c.psClient.GetProduct(ctx, &productV1.GetProductRequest{
+		Token: config.AppConfig.Token,
+		Sku:   sku,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return converter.DescToItemBase(res), nil
 }

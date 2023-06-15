@@ -14,9 +14,10 @@ import (
 var _ Client = (*client)(nil)
 
 type Client interface {
-	Close() error
 	TxManager
 	PG() PG
+	
+	Close() error
 }
 
 type TxManager interface {
