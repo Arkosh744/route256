@@ -4,6 +4,7 @@ import (
 	"context"
 	sq "github.com/Masterminds/squirrel"
 	"route256/libs/client/pg"
+	"route256/libs/log"
 	"sync"
 	"time"
 )
@@ -147,6 +148,7 @@ func (rl *SlidingWindowWithPG) Wait(ctx context.Context) error {
 		}
 
 		// Because we have a sliding window, we will wait for a half of the period and retry
+		log.Info("Rate limit exceeded, waiting")
 		time.Sleep(rl.interval / 2)
 	}
 

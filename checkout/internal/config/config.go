@@ -47,9 +47,11 @@ type Config struct {
 
 	Workers int `yaml:"workers"`
 
-	ReqLimit          int    `yaml:"requestLimit"`
-	ReqLimitPeriodRaw string `yaml:"requestLimitPeriod"`
-	ReqLimitPeriod    time.Duration
+	RateLimit struct {
+		Limit     int           `yaml:"limit"`
+		PeriodRaw string        `yaml:"periodRaw"`
+		Period    time.Duration `yaml:"-"`
+	} `yaml:"rateLimit"`
 
 	Log struct {
 		Preset string `yaml:"preset"`
@@ -64,13 +66,11 @@ func Init(_ context.Context) error {
 		return fmt.Errorf("read config file: %w", err)
 	}
 
-	err = yaml.Unmarshal(rawYaml, &AppConfig)
-	if err != nil {
+	if err = yaml.Unmarshal(rawYaml, &AppConfig); err != nil {
 		return fmt.Errorf("parse config file: %w", err)
 	}
 
-	err = AppConfig.getReqLimitPeriod()
-	if err != nil {
+	if err = AppConfig.getReqLimitPeriod(); err != nil {
 		return fmt.Errorf("get request limit period: %w", err)
 	}
 
@@ -95,12 +95,12 @@ func (c *Config) GetPostgresDSN() string {
 }
 
 func (c *Config) getReqLimitPeriod() error {
-	dur, err := time.ParseDuration(c.ReqLimitPeriodRaw)
+	dur, err := time.ParseDuration(c.RateLimit.PeriodRaw)
 	if err != nil {
 		return fmt.Errorf("parse request limit period: %w", err)
 	}
 
-	c.ReqLimitPeriod = dur
+	c.RateLimit.Period = dur
 
 	return nil
 }

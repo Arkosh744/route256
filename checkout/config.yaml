@@ -5,14 +5,14 @@ grpc:
   host: "0.0.0.0"
   port: 50052
 http:
-  host: localhost
+  host: "0.0.0.0"
   port: 8080
 swagger:
-  host: localhost
+  host: "0.0.0.0"
   port: 8088
 postgres:
-  host: localhost
-  port: 6432
+  host: checkout_pgbouncer
+  port: 5432
   user: checkout-user
   password: checkout-pass
   database: checkout-db
@@ -22,10 +22,11 @@ services:
   loms: "localhost:50053"
   productService: "route256.pavl.uk:8082"
 
-workers: 1
+workers: 2
 
-requestLimit: 2
-requestLimitPeriod: 1s
+rateLimit:
+  limit: 2
+  periodRaw: 1s
 
 log:
   preset: "dev"

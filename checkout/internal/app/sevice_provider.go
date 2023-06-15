@@ -95,13 +95,13 @@ func (s *serviceProvider) GetLomsClient(ctx context.Context) service.LomsClient 
 }
 
 func (s *serviceProvider) GetRateLimiter(_ context.Context) rate_limiter.RateLimiter {
-	rl := rate_limiter.NewSlidingWindow(config.AppConfig.ReqLimit, config.AppConfig.ReqLimitPeriod)
+	rl := rate_limiter.NewSlidingWindow(config.AppConfig.RateLimit.Limit, config.AppConfig.RateLimit.Period)
 
 	return rl
 }
 
 func (s *serviceProvider) GetRateLimiterWithPG(ctx context.Context) rate_limiter.RateLimiter {
-	rl, err := rate_limiter.NewSlidingWindowWithPG(ctx, config.AppConfig.ReqLimit, config.AppConfig.ReqLimitPeriod, s.GetPGClient(ctx))
+	rl, err := rate_limiter.NewSlidingWindowWithPG(ctx, config.AppConfig.RateLimit.Limit, config.AppConfig.RateLimit.Period, s.GetPGClient(ctx))
 	if err != nil {
 		log.Fatalf("failed to create rate limiter with pg: %s", err)
 	}

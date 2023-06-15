@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"route256/libs/log"
 	"time"
 
 	"route256/loms/internal/models"
@@ -21,7 +22,8 @@ func (s *service) Create(ctx context.Context, user int64, items []models.Item) (
 			return txErr
 		}
 
-		s.startPaymentTimeout(ctx, orderID)
+		//nolint:contextcheck // we start new context inside with cancel func because current ctx is dead after tx commit
+		s.startPaymentTimeout(orderID)
 
 		return nil
 	}); err != nil {
@@ -111,8 +113,8 @@ func (s *service) updateStockAndCreateReservation(
 	return nil
 }
 
-func (s *service) startPaymentTimeout(ctx context.Context, orderID int64) {
-	timerCtx, cancel := context.WithCancel(ctx)
+func (s *service) startPaymentTimeout(orderID int64) {
+	timerCtx, cancel := context.WithCancel(context.Background())
 
 	s.storage.mu.Lock()
 	defer s.storage.mu.Unlock()
@@ -135,6 +137,13 @@ func (s *service) orderTimeoutFunc(ctx context.Context, orderID int64) func() {
 
 		if ok && order.Paid {
 			s.storage.deleteFromStorage(orderID)
+
+			return
+		}
+
+		//waiting for allow from rate limiter
+		if err := s.rl.Wait(ctx); err != nil {
+			log.Errorf("failed to wait for rate limiter: %v", err)
 
 			return
 		}

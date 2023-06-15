@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"route256/libs/rate_limiter"
 	"sync"
 	"time"
 
@@ -13,15 +14,18 @@ type service struct {
 	repo      Repository
 	storage   orderStorage
 	txManager pg.TxManager
+
+	rl rate_limiter.RateLimiter
 }
 
-func New(repo Repository, tx pg.TxManager) *service {
+func New(repo Repository, tx pg.TxManager, rl rate_limiter.RateLimiter) *service {
 	return &service{
 		repo:      repo,
 		txManager: tx,
 		storage: orderStorage{
 			storage: make(map[int64]*orderStatus),
 		},
+		rl: rl,
 	}
 }
 
