@@ -10,6 +10,13 @@ http:
 swagger:
   host: "0.0.0.0"
   port: 8088
+postgres:
+  host: checkout_pgbouncer
+  port: 5432
+  user: checkout-user
+  password: checkout-pass
+  database: checkout-db
+  sslmode: disable
 
 services:
   loms: "loms:50053"

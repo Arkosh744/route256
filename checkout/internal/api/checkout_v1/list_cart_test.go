@@ -51,9 +51,9 @@ func TestImplementation_ListCart(t *testing.T) {
 				User: 1,
 			},
 			resInfo: &models.CartInfo{
-				Items: []models.ItemInfo{
+				Items: []models.Item{
 					{
-						ItemBase: models.ItemBase{
+						ItemInfo: models.ItemInfo{
 							Price: 1,
 							Name:  "test",
 						},
@@ -63,7 +63,7 @@ func TestImplementation_ListCart(t *testing.T) {
 						},
 					},
 					{
-						ItemBase: models.ItemBase{
+						ItemInfo: models.ItemInfo{
 							Price: 2,
 							Name:  "test2",
 						},

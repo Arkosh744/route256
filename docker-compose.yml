@@ -1,19 +1,94 @@
-version: "3.1"
+version: "3.8"
+
 services:
+
   checkout:
     image: checkout
     build: ./checkout/
+    networks:
+      - checkout_network
+      - service_network
     ports:
       - "8080:8080"
       - "8088:8088"
       - "50052:50052"
+
+  checkout_postgres:
+    image: postgres:15.1
+    environment:
+      POSTGRES_USER: checkout-user
+      POSTGRES_PASSWORD: checkout-pass
+      POSTGRES_DB: checkout-db
+    networks:
+      - checkout_network
+    ports:
+      - "5439:5432"
+    volumes:
+      - checkout_postgres_data:/var/lib/postgresql/data/
+
+  checkout_pgbouncer:
+    image: edoburu/pgbouncer:latest
+    environment:
+      DB_USER: checkout-user
+      DB_PASSWORD: checkout-pass
+      DB_HOST: checkout_postgres
+      DB_PORT: 5432
+      POOL_MODE: session
+      ADMIN_USERS: checkout-user
+      AUTH_TYPE: plain
+    networks:
+      - checkout_network
+    ports:
+      - "6432:5432"
+
+
   loms:
     image: loms
     build: ./loms/
+    networks:
+      - loms_network
+      - service_network
     ports:
       - "50053:50053"
+
+  loms_postgres:
+    image: postgres:15.1
+    environment:
+      POSTGRES_USER: loms-user
+      POSTGRES_PASSWORD: loms-pass
+      POSTGRES_DB: loms-db
+    networks:
+      - loms_network
+    volumes:
+      - loms_postgres_data:/var/lib/postgresql/data/
+
+  loms_pgbouncer:
+    image: edoburu/pgbouncer:latest
+    environment:
+      DB_USER: loms-user
+      DB_PASSWORD: loms-pass
+      DB_HOST: loms_postgres
+      DB_PORT: 5432
+      POOL_MODE: session
+      ADMIN_USERS: loms-user
+      AUTH_TYPE: plain
+    networks:
+      - loms_network
+    ports:
+      - "6433:5432"
+
   # notification:
   #   image: notification
   #   build: ./notification
   #   ports:
   #     - "8082:8082"
+
+
+networks:
+  checkout_network:
+  loms_network:
+  service_network:
+
+volumes:
+  checkout_postgres_data:
+  loms_postgres_data:

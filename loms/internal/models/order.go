@@ -1,7 +1,6 @@
 package models
 
 const (
-	OrderStatysUnknown         = "unknown"
 	OrderStatusNew             = "new"
 	OrderStatusAwaitingPayment = "awaiting_payment"
 	OrderStatusFailed          = "failed"
@@ -10,12 +9,12 @@ const (
 )
 
 type Order struct {
-	Status string
-	User   int64
+	Status string `db:"status"`
+	User   int64  `db:"user_id"`
 	Items  []Item
 }
 
 type Item struct {
-	SKU   uint32
-	Count uint32
+	SKU   uint32 `db:"sku"`
+	Count uint32 `db:"count"`
 }

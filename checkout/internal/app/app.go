@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"route256/checkout/internal/config"
-	"route256/checkout/internal/log"
 	"route256/libs/closer"
 	"route256/libs/interceptor"
+	"route256/libs/log"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 
@@ -93,7 +93,7 @@ func (app *App) Run() error {
 func (app *App) initDeps(ctx context.Context) error {
 	for _, init := range []func(context.Context) error{
 		config.Init,
-		log.InitLogger,
+		app.initLogger,
 		app.initServiceProvider,
 		app.initGrpcServer,
 		app.initHTTPServer,
@@ -102,6 +102,14 @@ func (app *App) initDeps(ctx context.Context) error {
 		if err := init(ctx); err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (app *App) initLogger(ctx context.Context) error {
+	if err := log.InitLogger(ctx, config.AppConfig.Log.Preset); err != nil {
+		return err
 	}
 
 	return nil

@@ -35,6 +35,78 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 	return m.recorder
 }
 
+// AddToCart mocks base method.
+func (m *MockRepository) AddToCart(ctx context.Context, user int64, item *models.ItemData) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddToCart", ctx, user, item)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AddToCart indicates an expected call of AddToCart.
+func (mr *MockRepositoryMockRecorder) AddToCart(ctx, user, item interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddToCart", reflect.TypeOf((*MockRepository)(nil).AddToCart), ctx, user, item)
+}
+
+// DeleteFromCart mocks base method.
+func (m *MockRepository) DeleteFromCart(ctx context.Context, user int64, item *models.ItemData) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteFromCart", ctx, user, item)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteFromCart indicates an expected call of DeleteFromCart.
+func (mr *MockRepositoryMockRecorder) DeleteFromCart(ctx, user, item interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteFromCart", reflect.TypeOf((*MockRepository)(nil).DeleteFromCart), ctx, user, item)
+}
+
+// DeleteUserCart mocks base method.
+func (m *MockRepository) DeleteUserCart(ctx context.Context, user int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteUserCart", ctx, user)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteUserCart indicates an expected call of DeleteUserCart.
+func (mr *MockRepositoryMockRecorder) DeleteUserCart(ctx, user interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteUserCart", reflect.TypeOf((*MockRepository)(nil).DeleteUserCart), ctx, user)
+}
+
+// GetCount mocks base method.
+func (m *MockRepository) GetCount(ctx context.Context, user int64, sku uint32) (uint16, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCount", ctx, user, sku)
+	ret0, _ := ret[0].(uint16)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCount indicates an expected call of GetCount.
+func (mr *MockRepositoryMockRecorder) GetCount(ctx, user, sku interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCount", reflect.TypeOf((*MockRepository)(nil).GetCount), ctx, user, sku)
+}
+
+// GetUserCart mocks base method.
+func (m *MockRepository) GetUserCart(ctx context.Context, user int64) ([]models.ItemData, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserCart", ctx, user)
+	ret0, _ := ret[0].([]models.ItemData)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserCart indicates an expected call of GetUserCart.
+func (mr *MockRepositoryMockRecorder) GetUserCart(ctx, user interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserCart", reflect.TypeOf((*MockRepository)(nil).GetUserCart), ctx, user)
+}
+
 // MockLomsClient is a mock of LomsClient interface.
 type MockLomsClient struct {
 	ctrl     *gomock.Controller
@@ -59,7 +131,7 @@ func (m *MockLomsClient) EXPECT() *MockLomsClientMockRecorder {
 }
 
 // CreateOrder mocks base method.
-func (m *MockLomsClient) CreateOrder(ctx context.Context, user int64, items []*models.ItemData) (int64, error) {
+func (m *MockLomsClient) CreateOrder(ctx context.Context, user int64, items []models.ItemData) (int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateOrder", ctx, user, items)
 	ret0, _ := ret[0].(int64)
@@ -112,10 +184,10 @@ func (m *MockPSClient) EXPECT() *MockPSClientMockRecorder {
 }
 
 // GetProduct mocks base method.
-func (m *MockPSClient) GetProduct(ctx context.Context, sku uint32) (*models.ItemBase, error) {
+func (m *MockPSClient) GetProduct(ctx context.Context, sku uint32) (*models.ItemInfo, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetProduct", ctx, sku)
-	ret0, _ := ret[0].(*models.ItemBase)
+	ret0, _ := ret[0].(*models.ItemInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

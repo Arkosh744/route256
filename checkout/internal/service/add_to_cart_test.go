@@ -4,15 +4,15 @@ import (
 	"context"
 	"testing"
 
-	"route256/checkout/internal/log"
 	"route256/checkout/internal/models"
+	"route256/libs/log"
 
 	"github.com/golang/mock/gomock"
 )
 
 func Test_cartService_AddToCart(t *testing.T) {
 	ctx := context.Background()
-	if err := log.InitLogger(ctx); err != nil {
+	if err := log.InitLogger(ctx, "dev"); err != nil {
 		t.Fatalf("error initializing logger: %v", err)
 	}
 

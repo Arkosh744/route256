@@ -12,7 +12,7 @@ func ListToDesc(info *models.CartInfo) *desc.ListCartResponse {
 	for _, item := range info.Items {
 		deskItems = append(deskItems, &desc.CartItem{
 			Sku:   item.SKU,
-			Count: item.Price,
+			Count: uint32(item.Count),
 			Price: item.Price,
 			Name:  item.Name,
 		})
@@ -24,13 +24,13 @@ func ListToDesc(info *models.CartInfo) *desc.ListCartResponse {
 	}
 }
 
-func ItemsDataToDesc(items []*models.ItemData) []*descLoms.Item {
+func ItemsDataToDesc(items []models.ItemData) []*descLoms.Item {
 	deskItems := make([]*descLoms.Item, 0, len(items))
 
 	for _, item := range items {
 		deskItems = append(deskItems, &descLoms.Item{
 			Sku:   item.SKU,
-			Count: item.Count,
+			Count: uint32(item.Count),
 		})
 	}
 
@@ -50,8 +50,8 @@ func DescToStock(in *descLoms.StocksResponse) []*models.Stock {
 	return result
 }
 
-func DescToItemBase(in *descPS.GetProductResponse) *models.ItemBase {
-	return &models.ItemBase{
+func DescToItemBase(in *descPS.GetProductResponse) *models.ItemInfo {
+	return &models.ItemInfo{
 		Name:  in.GetName(),
 		Price: in.GetPrice(),
 	}

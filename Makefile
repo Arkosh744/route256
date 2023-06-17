@@ -9,7 +9,6 @@ install-go-deps:
 	GOBIN=$(LOCAL_BIN) go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@v2.15.2
 	GOBIN=$(LOCAL_BIN) go install github.com/rakyll/statik@latest
 
-
 generate:
 	mkdir -p pkg/swagger
 	make generate-checkout-api
@@ -68,7 +67,9 @@ build-all:
 	cd notifications && GOOS=linux GOARCH=amd64 make build
 
 run-all: build-all
-	sudo docker compose up --force-recreate --build
+	sudo docker compose up --force-recreate --build -d
+	cd checkout && make local-migration-up
+	cd loms && make local-migration-up
 	#docker-compose up --force-recreate --build
 
 test:

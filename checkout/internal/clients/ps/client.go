@@ -19,7 +19,7 @@ func New(ps productV1.ProductServiceClient) *client {
 	}
 }
 
-func (c *client) GetProduct(ctx context.Context, sku uint32) (*models.ItemBase, error) {
+func (c *client) GetProduct(ctx context.Context, sku uint32) (*models.ItemInfo, error) {
 	res, err := c.psClient.GetProduct(ctx, &productV1.GetProductRequest{
 		Token: config.AppConfig.Token,
 		Sku:   sku,

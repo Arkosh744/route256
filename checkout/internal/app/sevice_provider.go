@@ -6,15 +6,18 @@ import (
 	"route256/checkout/internal/clients/loms"
 	"route256/checkout/internal/clients/ps"
 	"route256/checkout/internal/config"
-	"route256/checkout/internal/log"
 	"route256/checkout/internal/repository/cart"
 	"route256/checkout/internal/service"
+	"route256/libs/client/pg"
 	"route256/libs/closer"
+	"route256/libs/log"
 	lomsV1 "route256/pkg/loms_v1"
 	productV1 "route256/pkg/product_v1"
 
 	checkoutV1 "route256/checkout/internal/api/checkout_v1"
 
+	"github.com/jackc/pgx/v4/pgxpool"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -26,17 +29,42 @@ type serviceProvider struct {
 
 	cartImpl *checkoutV1.Implementation
 
-	loms service.LomsClient
-	ps   service.PSClient
+	pgClient pg.Client
+	loms     service.LomsClient
+	ps       service.PSClient
 }
 
 func newServiceProvider(_ context.Context) *serviceProvider {
 	return &serviceProvider{}
 }
 
-func (s *serviceProvider) GetCartRepo(_ context.Context) service.Repository {
+func (s *serviceProvider) GetPGClient(ctx context.Context) pg.Client {
+	if s.pgClient == nil {
+		pgCfg, err := pgxpool.ParseConfig(config.AppConfig.GetPostgresDSN())
+		if err != nil {
+			log.Fatalf("failed to parse pg config", zap.Error(err))
+		}
+
+		cl, err := pg.NewClient(ctx, pgCfg)
+		if err != nil {
+			log.Fatalf("failed to get pg client", zap.Error(err))
+		}
+
+		if cl.PG().Ping(ctx) != nil {
+			log.Fatalf("failed to ping pg", zap.Error(err))
+		}
+
+		closer.Add(cl.Close)
+
+		s.pgClient = cl
+	}
+
+	return s.pgClient
+}
+
+func (s *serviceProvider) GetCartRepo(ctx context.Context) service.Repository {
 	if s.repo == nil {
-		s.repo = cart.NewRepo()
+		s.repo = cart.NewRepo(s.GetPGClient(ctx))
 	}
 
 	return s.repo

@@ -5,8 +5,6 @@ import (
 	l "log"
 	"time"
 
-	"route256/loms/internal/config"
-
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -18,8 +16,8 @@ const (
 	devPreset        = "dev"
 )
 
-func InitLogger(_ context.Context) error {
-	zapLog, err := selectLogger()
+func InitLogger(_ context.Context, preset string) error {
+	zapLog, err := selectLogger(preset)
 	if err != nil {
 		return err
 	}
@@ -29,7 +27,7 @@ func InitLogger(_ context.Context) error {
 	return nil
 }
 
-func selectLogger() (*zap.Logger, error) {
+func selectLogger(preset string) (*zap.Logger, error) {
 	encoderConfig := zapcore.EncoderConfig{
 		TimeKey:        "time",
 		LevelKey:       "level",
@@ -44,7 +42,7 @@ func selectLogger() (*zap.Logger, error) {
 		EncodeCaller:   zapcore.ShortCallerEncoder,
 	}
 
-	cfg := getConfig()
+	cfg := getConfig(preset)
 	cfg.EncoderConfig = encoderConfig
 
 	logger, err := cfg.Build()
@@ -55,8 +53,8 @@ func selectLogger() (*zap.Logger, error) {
 	return logger, nil
 }
 
-func getConfig() zap.Config {
-	switch config.AppConfig.Log.Preset {
+func getConfig(preset string) zap.Config {
+	switch preset {
 	case productionPreset:
 		return zap.NewProductionConfig()
 	case devPreset:

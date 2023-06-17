@@ -1,21 +1,21 @@
 package models
 
-type ItemBase struct {
+type ItemInfo struct {
 	Name  string
 	Price uint32
 }
 
 type ItemData struct {
-	SKU   uint32
-	Count uint32
+	SKU   uint32 `db:"sku"`
+	Count uint16 `db:"count"`
 }
 
-type ItemInfo struct {
-	ItemBase
+type Item struct {
+	ItemInfo
 	ItemData
 }
 
 type CartInfo struct {
-	Items      []ItemInfo `json:"items"`
-	TotalPrice uint32     `json:"total_price"`
+	Items      []Item
+	TotalPrice uint32
 }

@@ -7,37 +7,35 @@ import (
 )
 
 func (s *cartService) ListCart(ctx context.Context, user int64) (*models.CartInfo, error) {
-	// for testing purposes
-	skus := []uint32{
-		1076963,
-		1148162,
-		1625903,
-		2618151,
+	userItems, err := s.repo.GetUserCart(ctx, user)
+	if err != nil {
+		return nil, err
 	}
-	counts := []uint32{1, 4, 2, 1}
 
-	items := make([]models.ItemInfo, 0, len(skus))
+	items := make([]models.Item, 0, len(userItems))
 
 	var totalPrice uint32
 
-	for i, sku := range skus {
-		res, err := s.psClient.GetProduct(ctx, sku)
+	for i := range userItems {
+		var res *models.ItemInfo
+
+		res, err = s.psClient.GetProduct(ctx, userItems[i].SKU)
 		if err != nil {
 			return nil, err
 		}
 
-		items = append(items, models.ItemInfo{
-			ItemBase: models.ItemBase{
+		items = append(items, models.Item{
+			ItemInfo: models.ItemInfo{
 				Name:  res.Name,
 				Price: res.Price,
 			},
 			ItemData: models.ItemData{
-				SKU:   sku,
-				Count: counts[i],
+				SKU:   userItems[i].SKU,
+				Count: userItems[i].Count,
 			},
 		})
 
-		totalPrice += res.Price * counts[i]
+		totalPrice += res.Price * uint32(userItems[i].Count)
 	}
 
 	return &models.CartInfo{
