@@ -20,21 +20,21 @@ import (
 )
 
 type serviceProvider struct {
-	cartService service.Service
+	cartService checkoutV1.Service
 
-	repo cart.Repository
+	repo service.Repository
 
 	cartImpl *checkoutV1.Implementation
 
-	loms loms.Client
-	ps   ps.Client
+	loms service.LomsClient
+	ps   service.PSClient
 }
 
 func newServiceProvider(_ context.Context) *serviceProvider {
 	return &serviceProvider{}
 }
 
-func (s *serviceProvider) GetCartRepo(_ context.Context) cart.Repository {
+func (s *serviceProvider) GetCartRepo(_ context.Context) service.Repository {
 	if s.repo == nil {
 		s.repo = cart.NewRepo()
 	}
@@ -43,7 +43,7 @@ func (s *serviceProvider) GetCartRepo(_ context.Context) cart.Repository {
 }
 
 //nolint:dupl // we initialize clients in the same way
-func (s *serviceProvider) GetLomsClient(ctx context.Context) loms.Client {
+func (s *serviceProvider) GetLomsClient(ctx context.Context) service.LomsClient {
 	if s.loms == nil {
 		conn, err := grpc.DialContext(
 			ctx,
@@ -66,7 +66,7 @@ func (s *serviceProvider) GetLomsClient(ctx context.Context) loms.Client {
 }
 
 //nolint:dupl // we initialize clients in the same way
-func (s *serviceProvider) GetPSClient(ctx context.Context) ps.Client {
+func (s *serviceProvider) GetPSClient(ctx context.Context) service.PSClient {
 	if s.ps == nil {
 		conn, err := grpc.DialContext(
 			ctx,
@@ -88,7 +88,7 @@ func (s *serviceProvider) GetPSClient(ctx context.Context) ps.Client {
 	return s.ps
 }
 
-func (s *serviceProvider) GetCartService(ctx context.Context) service.Service {
+func (s *serviceProvider) GetCartService(ctx context.Context) checkoutV1.Service {
 	if s.cartService == nil {
 		s.cartService = service.New(s.GetCartRepo(ctx), s.GetLomsClient(ctx), s.GetPSClient(ctx))
 	}

@@ -1,33 +1,33 @@
+//go:generate mockgen -package=service -destination=./service_mock_internal_test.go -source=${GOFILE}
 package service
 
 import (
 	"context"
 
-	"route256/checkout/internal/clients/loms"
-	"route256/checkout/internal/clients/ps"
 	"route256/checkout/internal/models"
-	"route256/checkout/internal/repository/cart"
 )
 
-var _ Service = (*cartService)(nil)
-
-type Service interface {
-	AddToCart(ctx context.Context, user int64, sku uint32, count uint16) error
-	DeleteFromCart(ctx context.Context, user int64, sku uint32, count uint16) error
-	ListCart(ctx context.Context, user int64) (*models.CartInfo, error)
-	Purchase(ctx context.Context, user int64) (int64, error)
-}
-
 type cartService struct {
-	repo       cart.Repository
-	lomsClient loms.Client
-	psClient   ps.Client
+	repo       Repository
+	lomsClient LomsClient
+	psClient   PSClient
 }
 
-func New(repo cart.Repository, cLoms loms.Client, cPS ps.Client) *cartService {
+func New(repo Repository, loms LomsClient, ps PSClient) *cartService {
 	return &cartService{
 		repo:       repo,
-		lomsClient: cLoms,
-		psClient:   cPS,
+		lomsClient: loms,
+		psClient:   ps,
 	}
+}
+
+type Repository interface{}
+
+type LomsClient interface {
+	Stocks(ctx context.Context, sku uint32) ([]*models.Stock, error)
+	CreateOrder(ctx context.Context, user int64, items []*models.ItemData) (int64, error)
+}
+
+type PSClient interface {
+	GetProduct(ctx context.Context, sku uint32) (*models.ItemBase, error)
 }

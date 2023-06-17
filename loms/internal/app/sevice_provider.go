@@ -9,11 +9,11 @@ import (
 )
 
 type serviceProvider struct {
-	service service.Service
+	service LomsV1.Service
 
 	lomsImpl *LomsV1.Implementation
 
-	repo cart.Repository
+	repo service.Repository
 }
 
 func newServiceProvider(_ context.Context) *serviceProvider {
@@ -22,7 +22,7 @@ func newServiceProvider(_ context.Context) *serviceProvider {
 	return sp
 }
 
-func (s *serviceProvider) GetRepository(_ context.Context) cart.Repository {
+func (s *serviceProvider) GetRepository(_ context.Context) service.Repository {
 	if s.repo == nil {
 		s.repo = cart.NewRepo()
 	}
@@ -30,7 +30,7 @@ func (s *serviceProvider) GetRepository(_ context.Context) cart.Repository {
 	return s.repo
 }
 
-func (s *serviceProvider) GetLomsService(ctx context.Context) service.Service {
+func (s *serviceProvider) GetLomsService(ctx context.Context) LomsV1.Service {
 	if s.service == nil {
 		s.service = service.New(s.GetRepository(ctx))
 	}

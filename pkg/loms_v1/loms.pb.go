@@ -607,12 +607,12 @@ var file_loms_proto_depIdxs = []int32{
 	7, // 3: route256.loms.StocksResponse.stocks:type_name -> route256.loms.Stock
 	1, // 4: route256.loms.Loms.CreateOrder:input_type -> route256.loms.CreateOrderRequest
 	8, // 5: route256.loms.Loms.ListOrder:input_type -> route256.loms.OrderIDRequest
-	8, // 6: route256.loms.Loms.OrderPayed:input_type -> route256.loms.OrderIDRequest
+	8, // 6: route256.loms.Loms.OrderPaid:input_type -> route256.loms.OrderIDRequest
 	8, // 7: route256.loms.Loms.CancelOrder:input_type -> route256.loms.OrderIDRequest
 	5, // 8: route256.loms.Loms.Stocks:input_type -> route256.loms.StocksRequest
 	3, // 9: route256.loms.Loms.CreateOrder:output_type -> route256.loms.CreateOrderResponse
 	4, // 10: route256.loms.Loms.ListOrder:output_type -> route256.loms.ListOrderResponse
-	9, // 11: route256.loms.Loms.OrderPayed:output_type -> google.protobuf.Empty
+	9, // 11: route256.loms.Loms.OrderPaid:output_type -> google.protobuf.Empty
 	9, // 12: route256.loms.Loms.CancelOrder:output_type -> google.protobuf.Empty
 	6, // 13: route256.loms.Loms.Stocks:output_type -> route256.loms.StocksResponse
 	9, // [9:14] is the sub-list for method output_type

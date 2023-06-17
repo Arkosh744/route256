@@ -9,12 +9,6 @@ import (
 	productV1 "route256/pkg/product_v1"
 )
 
-var _ Client = (*client)(nil)
-
-type Client interface {
-	GetProduct(ctx context.Context, sku uint32) (*models.ItemBase, error)
-}
-
 type client struct {
 	psClient productV1.ProductServiceClient
 }
