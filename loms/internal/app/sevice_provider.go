@@ -6,6 +6,7 @@ import (
 	"route256/libs/client/pg"
 	"route256/libs/closer"
 	"route256/libs/log"
+	"route256/libs/rate_limiter"
 	LomsV1 "route256/loms/internal/api/loms_v1"
 	"route256/loms/internal/config"
 	"route256/loms/internal/repository/cart"
@@ -28,6 +29,26 @@ func newServiceProvider(_ context.Context) *serviceProvider {
 	sp := &serviceProvider{}
 
 	return sp
+}
+
+func (s *serviceProvider) GetRateLimiter(_ context.Context) rate_limiter.RateLimiter {
+	rl := rate_limiter.NewSlidingWindow(config.AppConfig.RateLimit.Limit, config.AppConfig.RateLimit.Period)
+
+	return rl
+}
+
+func (s *serviceProvider) GetRateLimiterWithPG(ctx context.Context) rate_limiter.RateLimiter {
+	rl, err := rate_limiter.NewSlidingWindowWithPG(
+		ctx,
+		config.AppConfig.RateLimit.Limit,
+		config.AppConfig.RateLimit.Period,
+		s.GetPGClient(ctx),
+	)
+	if err != nil {
+		log.Fatalf("failed to create rate limiter with pg: %s", err)
+	}
+
+	return rl
 }
 
 func (s *serviceProvider) GetPGClient(ctx context.Context) pg.Client {
@@ -64,7 +85,7 @@ func (s *serviceProvider) GetRepository(ctx context.Context) service.Repository 
 
 func (s *serviceProvider) GetLomsService(ctx context.Context) LomsV1.Service {
 	if s.service == nil {
-		s.service = service.New(s.GetRepository(ctx), s.GetPGClient(ctx))
+		s.service = service.New(s.GetRepository(ctx), s.GetPGClient(ctx), s.GetRateLimiterWithPG(ctx))
 	}
 
 	return s.service

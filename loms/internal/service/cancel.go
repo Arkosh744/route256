@@ -38,7 +38,7 @@ func (s *service) cancelOrderAndRestock(ctx context.Context, orderID int64) erro
 			return ErrInvalidOrderStatus
 		}
 
-		if err := s.repo.UpdateOrderStatus(ctx, orderID, models.OrderStatusCanceled); err != nil {
+		if err = s.repo.UpdateOrderStatus(ctx, orderID, models.OrderStatusCanceled); err != nil {
 			log.Errorf("failed to update order %d status to 'canceled': %v", orderID, err)
 
 			return err

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"route256/libs/client/pg"
+	"route256/libs/rate_limiter"
 	"route256/loms/internal/models"
 )
 
@@ -13,15 +14,18 @@ type service struct {
 	repo      Repository
 	storage   orderStorage
 	txManager pg.TxManager
+
+	rl rate_limiter.RateLimiter
 }
 
-func New(repo Repository, tx pg.TxManager) *service {
+func New(repo Repository, tx pg.TxManager, rl rate_limiter.RateLimiter) *service {
 	return &service{
 		repo:      repo,
 		txManager: tx,
 		storage: orderStorage{
 			storage: make(map[int64]*orderStatus),
 		},
+		rl: rl,
 	}
 }
 

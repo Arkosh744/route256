@@ -5,9 +5,9 @@ import (
 	"errors"
 	"time"
 
-	"route256/loms/internal/models"
-
 	"go.uber.org/multierr"
+	"route256/libs/log"
+	"route256/loms/internal/models"
 )
 
 func (s *service) Create(ctx context.Context, user int64, items []models.Item) (int64, error) {
@@ -21,7 +21,7 @@ func (s *service) Create(ctx context.Context, user int64, items []models.Item) (
 			return txErr
 		}
 
-		//nolint:contextcheck // we start new context inside with cancel func
+		//nolint:contextcheck // we start new context inside with cancel func because current ctx is dead after tx commit
 		s.startPaymentTimeout(orderID)
 
 		return nil
@@ -136,6 +136,13 @@ func (s *service) orderTimeoutFunc(ctx context.Context, orderID int64) func() {
 
 		if ok && order.Paid {
 			s.storage.deleteFromStorage(orderID)
+
+			return
+		}
+
+		// waiting for allow from rate limiter
+		if err := s.rl.Wait(ctx); err != nil {
+			log.Errorf("failed to wait for rate limiter: %v", err)
 
 			return
 		}

@@ -39,7 +39,7 @@ func selectLogger(preset string) (*zap.Logger, error) {
 		EncodeLevel:    customLevelEncoder,
 		EncodeTime:     customTimeEncoder,
 		EncodeDuration: zapcore.SecondsDurationEncoder,
-		EncodeCaller:   zapcore.ShortCallerEncoder,
+		EncodeCaller:   func(caller zapcore.EntryCaller, enc zapcore.PrimitiveArrayEncoder) {},
 	}
 
 	cfg := getConfig(preset)

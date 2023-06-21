@@ -111,6 +111,7 @@ linters:
     - scopelint # Deprecated
     - testpackage
     - gofumpt
+    - goimports
 
 run:
   timeout: 10m

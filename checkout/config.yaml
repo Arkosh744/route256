@@ -19,8 +19,14 @@ postgres:
   sslmode: disable
 
 services:
-  loms: "loms:50053"
+  loms: "localhost:50053"
   productService: "route256.pavl.uk:8082"
+
+workers: 2
+
+rateLimit:
+  limit: 2
+  periodRaw: 1s
 
 log:
   preset: "dev"
