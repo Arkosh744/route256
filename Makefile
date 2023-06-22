@@ -1,5 +1,6 @@
 LOCAL_BIN:=$(CURDIR)/bin
 
+
 install-go-deps:
 	mkdir -p bin
 	GOBIN=$(LOCAL_BIN) go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28.1
@@ -72,10 +73,13 @@ run-all: build-all
 	cd loms && make local-migration-up
 	#docker-compose up --force-recreate --build
 
+install-go-goose:
+	go install github.com/pressly/goose/v3/cmd/goose@latest
+
 test:
-	cd checkout && go test ./...
-	cd loms && go test ./...
-	cd notifications && go test ./...
+	cd checkout && go test -cover ./...
+	cd loms && go test -cover ./...
+	cd notifications && go test -cover ./...
 
 regenerate_mocks:
 	cd checkout && go generate -run="mockgen .*" -x ./...

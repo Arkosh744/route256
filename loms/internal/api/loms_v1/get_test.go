@@ -66,7 +66,7 @@ func TestImplementation_ListOrder(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockService.EXPECT().Get(ctx, tt.req.GetOrderId()).
-				Return(tt.mockServiceErr).
+				Return(tt.res, tt.mockServiceErr).
 				Times(1)
 
 			res, err := impl.ListOrder(ctx, tt.req)
@@ -74,10 +74,11 @@ func TestImplementation_ListOrder(t *testing.T) {
 				assert.Error(t, err)
 				assert.Equal(t, tt.wantCode, status.Code(err))
 			} else {
+				convRes := converter.ToOrderDesc(tt.res)
 				assert.NoError(t, err)
-				assert.Equal(t, tt.res.Status, res.GetStatus())
-				assert.Equal(t, tt.res.User, res.GetUser())
-				assert.Equal(t, converter.ToItemsDesc(tt.res.Items), res.GetItems())
+				assert.Equal(t, convRes.Status, res.GetStatus())
+				assert.Equal(t, convRes.User, res.GetUser())
+				assert.Equal(t, convRes.Items, res.GetItems())
 			}
 		})
 	}

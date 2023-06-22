@@ -3,11 +3,11 @@ package pg
 import (
 	"context"
 
+	"route256/libs/log"
+
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"go.uber.org/multierr"
-	"go.uber.org/zap"
-	"route256/libs/log"
 )
 
 var _ Client = (*client)(nil)
@@ -30,8 +30,6 @@ type client struct {
 func NewClient(ctx context.Context, pgCfg *pgxpool.Config) (Client, error) {
 	dbc, err := pgxpool.ConnectConfig(ctx, pgCfg)
 	if err != nil {
-		log.Errorf("failed to connect to postgres", zap.Error(err))
-
 		return nil, err
 	}
 

@@ -24,7 +24,7 @@ build: bindir
 	go build -o ${BINDIR}/app ${PACKAGE}
 
 test:
-	go test ./...
+	go test -cover ./...
 
 run:
 	go run ${PACKAGE}
