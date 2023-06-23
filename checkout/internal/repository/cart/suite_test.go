@@ -27,20 +27,22 @@ type Suite struct {
 }
 
 func TestSuite(t *testing.T) {
-	s := new(Suite)
-	s.SetupSuite()
-
-	suite.Run(t, s)
+	suite.Run(t, new(Suite))
 }
 
 func (s *Suite) SetupSuite() {
 	const (
 		logPreset      = "dev"
-		pgUser         = "user"
-		pgPass         = "secret"
-		pgDB           = "test"
+		pgTestUser     = "test"
+		pgTestPass     = "test"
+		pgTestDB       = "test"
 		migrationsPath = "../../../migrations"
 	)
+
+	ctx := context.Background()
+	if err := log.InitLogger(ctx, logPreset); err != nil {
+		l.Fatalf("failed to init logger %v", zap.Error(err))
+	}
 
 	// Get postgres container
 
@@ -56,7 +58,7 @@ func (s *Suite) SetupSuite() {
 	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
 		Repository: "postgres",
 		Tag:        "15",
-		Env:        []string{"POSTGRES_PASSWORD=" + pgPass, "POSTGRES_USER=" + pgUser, "POSTGRES_DB=" + pgDB},
+		Env:        []string{"POSTGRES_PASSWORD=" + pgTestPass, "POSTGRES_USER=" + pgTestUser, "POSTGRES_DB=" + pgTestDB},
 	}, func(config *docker.HostConfig) {
 		config.AutoRemove = true
 		config.RestartPolicy = docker.RestartPolicy{Name: "no"}
@@ -68,12 +70,7 @@ func (s *Suite) SetupSuite() {
 	s.pool = pool
 	s.resource = resource
 
-	ctx := context.Background()
-	if err = log.InitLogger(ctx, logPreset); err != nil {
-		l.Fatalf("failed to init logger %v", zap.Error(err))
-	}
-
-	dsn := s.getPostgresDSN("localhost", resource.GetPort("5432/tcp"), pgUser, pgPass, pgDB)
+	dsn := s.getPostgresDSN("localhost", resource.GetPort("5432/tcp"), pgTestUser, pgTestPass, pgTestDB)
 
 	pgCfg, err := pgxpool.ParseConfig(dsn)
 	if err != nil {
@@ -109,7 +106,7 @@ func (s *Suite) SetupSuite() {
 	s.repo = NewRepo(db)
 }
 
-func (s *Suite) TeardownSuite() {
+func (s *Suite) TearDownSuite() {
 	if err := s.pool.Purge(s.resource); err != nil {
 		log.Fatalf("Could not purge resource: %s", err)
 	}
