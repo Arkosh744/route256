@@ -23,8 +23,14 @@ all: format build test lint
 build: bindir
 	go build -o ${BINDIR}/app ${PACKAGE}
 
-test:
-	go test ./...
+test-integration:
+	go test -tags=integration -cover ./...
+
+
+test-unit:
+	go test -tags=unit -cover ./...
+
+test-all: test-integration test-unit
 
 run:
 	go run ${PACKAGE}

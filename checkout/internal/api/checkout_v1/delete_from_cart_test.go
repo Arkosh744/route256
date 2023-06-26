@@ -1,3 +1,5 @@
+//+build unit
+
 package checkout_v1
 
 import (
@@ -58,7 +60,7 @@ func TestImplementation_DeleteFromCart(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockCartService.EXPECT().
-				DeleteFromCart(ctx, tt.req.GetUser(), tt.req.GetSku(), tt.req.GetCount()).
+				DeleteFromCart(ctx, tt.req.GetUser(), tt.req.GetSku(), uint16(tt.req.GetCount())).
 				Return(tt.mockServiceErr).
 				Times(1)
 
