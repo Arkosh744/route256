@@ -1,4 +1,6 @@
-package cart
+//+build integration
+
+package integration
 
 import (
 	"context"

@@ -78,8 +78,8 @@ install-go-goose:
 
 test:
 	go clean -testcache;
-	cd checkout && go test -cover ./...
-	cd loms && go test -cover ./...
+	cd checkout && make test-all
+	cd loms && make test
 	cd notifications && go test -cover ./...
 
 regenerate_mocks:

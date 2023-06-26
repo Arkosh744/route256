@@ -1,4 +1,6 @@
-package cart
+//+build integration
+
+package integration
 
 import (
 	"context"
@@ -7,6 +9,7 @@ import (
 	"os/exec"
 	"testing"
 
+	"route256/checkout/internal/repository/cart"
 	"route256/libs/log"
 
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -23,7 +26,7 @@ type Suite struct {
 
 	pool     *dockertest.Pool
 	resource *dockertest.Resource
-	repo     *repository
+	repo     *cart.Repository
 }
 
 func TestSuite(t *testing.T) {
@@ -36,7 +39,7 @@ func (s *Suite) SetupSuite() {
 		pgTestUser     = "test"
 		pgTestPass     = "test"
 		pgTestDB       = "test"
-		migrationsPath = "../../../migrations"
+		migrationsPath = "../../../../migrations"
 	)
 
 	ctx := context.Background()
@@ -103,7 +106,7 @@ func (s *Suite) SetupSuite() {
 		log.Fatalf("failed to create pg client %v", zap.Error(err))
 	}
 
-	s.repo = NewRepo(db)
+	s.repo = cart.NewRepo(db)
 }
 
 func (s *Suite) TearDownSuite() {

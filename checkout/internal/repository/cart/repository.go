@@ -13,15 +13,15 @@ import (
 
 const tableName = "items"
 
-type repository struct {
+type Repository struct {
 	client pg.Client
 }
 
-func NewRepo(client pg.Client) *repository {
-	return &repository{client: client}
+func NewRepo(client pg.Client) *Repository {
+	return &Repository{client: client}
 }
 
-func (r *repository) AddToCart(ctx context.Context, user int64, item *models.ItemData) error {
+func (r *Repository) AddToCart(ctx context.Context, user int64, item *models.ItemData) error {
 	builder := sq.Insert(tableName).
 		PlaceholderFormat(sq.Dollar).
 		Columns("user_id", "sku", "count").
@@ -45,7 +45,7 @@ func (r *repository) AddToCart(ctx context.Context, user int64, item *models.Ite
 	return nil
 }
 
-func (r *repository) GetCount(ctx context.Context, user int64, sku uint32) (uint16, error) {
+func (r *Repository) GetCount(ctx context.Context, user int64, sku uint32) (uint16, error) {
 	builder := sq.Select("count").From(tableName).
 		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{"user_id": user, "sku": sku}).
@@ -69,7 +69,7 @@ func (r *repository) GetCount(ctx context.Context, user int64, sku uint32) (uint
 	return count, nil
 }
 
-func (r *repository) GetUserCart(ctx context.Context, user int64) ([]models.ItemData, error) {
+func (r *Repository) GetUserCart(ctx context.Context, user int64) ([]models.ItemData, error) {
 	builder := sq.Select("sku", "count").From(tableName).
 		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{"user_id": user})
@@ -92,7 +92,7 @@ func (r *repository) GetUserCart(ctx context.Context, user int64) ([]models.Item
 	return items, nil
 }
 
-func (r *repository) DeleteFromCart(ctx context.Context, user int64, item *models.ItemData) error {
+func (r *Repository) DeleteFromCart(ctx context.Context, user int64, item *models.ItemData) error {
 	if err := r.client.RunRepeatableRead(ctx, func(ctx context.Context) error {
 		count, err := r.GetCount(ctx, user, item.SKU)
 		if err != nil {
@@ -117,7 +117,7 @@ func (r *repository) DeleteFromCart(ctx context.Context, user int64, item *model
 	return nil
 }
 
-func (r *repository) deleteItemFromCart(ctx context.Context, user int64, item *models.ItemData) error {
+func (r *Repository) deleteItemFromCart(ctx context.Context, user int64, item *models.ItemData) error {
 	builder := sq.Delete(tableName).
 		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{"user_id": user, "sku": item.SKU})
@@ -139,7 +139,7 @@ func (r *repository) deleteItemFromCart(ctx context.Context, user int64, item *m
 	return nil
 }
 
-func (r *repository) removeItemsFromCart(ctx context.Context, user int64, count uint16, item *models.ItemData) error {
+func (r *Repository) removeItemsFromCart(ctx context.Context, user int64, count uint16, item *models.ItemData) error {
 	builder := sq.Update(tableName).
 		PlaceholderFormat(sq.Dollar).
 		Set("count", count-item.Count).
@@ -162,7 +162,7 @@ func (r *repository) removeItemsFromCart(ctx context.Context, user int64, count 
 	return nil
 }
 
-func (r *repository) DeleteUserCart(ctx context.Context, user int64) error {
+func (r *Repository) DeleteUserCart(ctx context.Context, user int64) error {
 	builder := sq.Delete(tableName).
 		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{"user_id": user})
