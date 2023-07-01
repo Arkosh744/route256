@@ -1,4 +1,5 @@
-//+build unit
+//go:build unit
+// +build unit
 
 package checkout_v1
 

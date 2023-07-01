@@ -42,5 +42,6 @@ func (o orderStatusSender) SendOrderStatus(orderID int64, status string) error {
 	}
 
 	log.Infof("order id: %d, status: %v, partition: %d, offset: %d", orderID, status, partition, offset)
+
 	return nil
 }

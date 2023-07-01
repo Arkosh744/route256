@@ -12,6 +12,7 @@ func NewConsumer(brokers []string) (sarama.Consumer, error) {
 	config.Consumer.Offsets.AutoCommit.Enable = true
 	config.Consumer.Offsets.AutoCommit.Interval = 1 * time.Second
 	config.Consumer.Offsets.Initial = sarama.OffsetNewest
+
 	consumer, err := sarama.NewConsumer(brokers, config)
 	if err != nil {
 		return nil, err

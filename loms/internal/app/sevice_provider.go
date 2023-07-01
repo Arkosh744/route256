@@ -84,8 +84,9 @@ func (s *serviceProvider) GetRepository(ctx context.Context) service.Repository 
 
 	return s.repo
 }
+
 func (s *serviceProvider) GetKafkaSyncProducer() (sarama.SyncProducer, error) {
-	var cfg = sarama.NewConfig()
+	cfg := sarama.NewConfig()
 
 	cfg.Producer.Return.Successes = true
 	cfg.Producer.Return.Errors = true
@@ -129,7 +130,7 @@ func ensureTopicExists(admin sarama.ClusterAdmin, topic string, numPartitions in
 			ReplicationFactor: replicationFactor,
 		}
 
-		if err = admin.CreateTopic(topic, details, false); err != nil {
+		if err := admin.CreateTopic(topic, details, false); err != nil {
 			return err
 		}
 	}

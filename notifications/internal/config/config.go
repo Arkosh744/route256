@@ -14,6 +14,11 @@ type Config struct {
 		Brokers []string `yaml:"brokers"`
 		Topic   string   `yaml:"topic"`
 	} `yaml:"kafka"`
+
+	Tg struct {
+		Token  string `yaml:"token"`
+		ChatID int64  `yaml:"chatId"`
+	} `yaml:"tg"`
 }
 
 var AppConfig = Config{}

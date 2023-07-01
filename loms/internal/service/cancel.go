@@ -67,12 +67,11 @@ func (s *service) cancelOrderAndRestock(ctx context.Context, orderID int64) erro
 		}
 
 		if err = s.repo.DeleteReservation(ctx, orderID); err != nil {
-			return fmt.Errorf("failed to delete reservation for order %d: %v", orderID, err)
+			return fmt.Errorf("failed to delete reservation for order %d: %w", orderID, err)
 		}
 
 		return nil
 	}); err != nil {
-
 		return err
 	}
 

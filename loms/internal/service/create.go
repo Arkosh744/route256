@@ -37,7 +37,7 @@ func (s *service) Create(ctx context.Context, user int64, items []models.Item) (
 		if err = s.kafka.SendOrderStatus(orderID, models.OrderStatusFailed); err != nil {
 			log.Errorf("failed to send order status: %v", err)
 
-			err = multierr.Append(err, fmt.Errorf("failed to send order status: %v", err))
+			err = multierr.Append(err, fmt.Errorf("failed to send order status: %w", err))
 		}
 
 		if txErr := s.repo.UpdateOrderStatus(ctx, orderID, models.OrderStatusFailed); txErr != nil {

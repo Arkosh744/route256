@@ -9,6 +9,7 @@ import (
 	"route256/notifications/internal/config"
 	"route256/notifications/internal/kafka"
 	orderStatus "route256/notifications/internal/notifications/order_status"
+	"route256/notifications/internal/tg"
 )
 
 func main() {
@@ -21,8 +22,13 @@ func main() {
 		log.Fatalf("Unable to create kafka consumer: %v", err)
 	}
 
-	receiver := orderStatus.NewReceiver(consumer)
-	if err = receiver.Subscribe(config.AppConfig.Kafka.Topic);  err != nil {
+	bot, err := tg.NewBot(config.AppConfig.Tg.Token)
+	if err != nil {
+		log.Fatalf("Unable to create telegram bot: %v", err)
+	}
+
+	receiver := orderStatus.NewReceiver(consumer, bot, config.AppConfig.Tg.ChatID)
+	if err = receiver.Subscribe(config.AppConfig.Kafka.Topic); err != nil {
 		log.Fatalf("Unable to subscribe to kafka topic: %v", err)
 	}
 

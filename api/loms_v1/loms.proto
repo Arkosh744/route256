@@ -10,7 +10,7 @@ option go_package = "route256/product-service/pkg/loms_v1";
 service Loms {
   rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse);
   rpc ListOrder(OrderIDRequest) returns (ListOrderResponse);
-  rpc OrderPayed(OrderIDRequest) returns (google.protobuf.Empty);
+  rpc OrderPaid(OrderIDRequest) returns (google.protobuf.Empty);
   rpc CancelOrder(OrderIDRequest) returns (google.protobuf.Empty);
   rpc Stocks(StocksRequest) returns (StocksResponse);
 }
