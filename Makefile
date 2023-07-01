@@ -71,7 +71,6 @@ run-all: build-all
 	sudo docker compose up --force-recreate --build -d
 	cd checkout && make local-migration-up
 	cd loms && make local-migration-up
-	#docker-compose up --force-recreate --build
 
 install-go-goose:
 	go install github.com/pressly/goose/v3/cmd/goose@latest

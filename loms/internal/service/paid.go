@@ -20,6 +20,12 @@ func (s *service) Paid(ctx context.Context, orderID int64) error {
 		s.storage.deleteFromStorage(orderID)
 	}
 
+	if err := s.kafka.SendOrderStatus(orderID, models.OrderStatusPaid); err != nil {
+		log.Errorf("failed to send order status: %v", err)
+
+		return err
+	}
+
 	return nil
 }
 
