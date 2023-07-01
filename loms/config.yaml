@@ -12,9 +12,9 @@ postgres:
 
 kafka:
   brokers:
-    - "kafka1:9091"
-    - "kafka2:9092"
-    - "kafka3:9093"
+    - kafka1:29091
+    - kafka2:29092
+    - kafka3:29093
   topic: "loms"
 
 rateLimit:
