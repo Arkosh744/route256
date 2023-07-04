@@ -1,3 +1,4 @@
+//go:generate mockgen -package=service -destination=./service_mock_internal_test.go -source=${GOFILE}
 package service
 
 import (
@@ -15,7 +16,7 @@ type service struct {
 	repo      Repository
 	storage   orderStorage
 	txManager pg.TxManager
-	kafka     status.OrderStatusSender
+	kafka     OrderStatusSender
 
 	rl rate_limiter.RateLimiter
 }
@@ -47,6 +48,10 @@ type Repository interface {
 	InsertStock(ctx context.Context, item models.ReservationItem) error
 	UpdateStock(ctx context.Context, warehouseID int64, sku uint32, count uint64) error
 	DeleteStock(ctx context.Context, warehouseID int64, sku uint32) error
+}
+
+type OrderStatusSender interface {
+	SendOrderStatus(orderID int64, status string) error
 }
 
 // orderStorage is a storage for orders to cancel them after timeout.

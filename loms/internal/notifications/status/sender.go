@@ -9,11 +9,7 @@ import (
 	"github.com/Shopify/sarama"
 )
 
-type OrderStatusSender interface {
-	SendOrderStatus(orderID int64, status string) error
-}
-
-type orderStatusSender struct {
+type OrderStatusSender struct {
 	producer sarama.SyncProducer
 	topic    string
 }
@@ -21,13 +17,13 @@ type orderStatusSender struct {
 type Handler func(id string)
 
 func NewOrderStatusSender(producer sarama.SyncProducer, topic string) OrderStatusSender {
-	return orderStatusSender{
+	return OrderStatusSender{
 		producer: producer,
 		topic:    topic,
 	}
 }
 
-func (o orderStatusSender) SendOrderStatus(orderID int64, status string) error {
+func (o OrderStatusSender) SendOrderStatus(orderID int64, status string) error {
 	msg := &sarama.ProducerMessage{
 		Topic:     o.topic,
 		Key:       sarama.StringEncoder(fmt.Sprint(orderID)),

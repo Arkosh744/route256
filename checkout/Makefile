@@ -26,11 +26,10 @@ build: bindir
 test-integration:
 	go test -tags=integration -cover ./...
 
+test:
+	go test -cover ./...
 
-test-unit:
-	go test -tags=unit -cover ./...
-
-test-all: test-integration test-unit
+test-all: test-integration test
 
 run:
 	go run ${PACKAGE}
