@@ -15,15 +15,15 @@ import (
 )
 
 func LoggingInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+	log.Debug("incoming GRPC request", zap.String("method", info.FullMethod), zap.Any("request", req))
+	metrics.RequestsCounter.WithLabelValues(info.FullMethod).Inc()
+
 	span := opentracing.SpanFromContext(ctx)
 	if span != nil {
 		if sc, ok := span.Context().(jaeger.SpanContext); ok {
 			log.Debug("tracing", zap.String("traceID", sc.TraceID().String()), zap.String("spanID", sc.SpanID().String()))
 		}
 	}
-
-	log.Debug("incoming GRPC request", zap.String("method", info.FullMethod), zap.Any("request", req))
-	metrics.RequestsCounter.WithLabelValues(info.FullMethod).Inc()
 
 	timeStart := time.Now()
 

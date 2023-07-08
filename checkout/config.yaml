@@ -14,7 +14,7 @@ metrics:
   host: "0.0.0.0"
   port: 7080
 jaeger:
-  host: "0.0.0.0"
+  host: jaeger
   port: 6831
 
 postgres:

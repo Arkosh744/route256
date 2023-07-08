@@ -10,6 +10,7 @@ import (
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/opentracing/opentracing-go"
 )
 
 type Query struct {
@@ -60,6 +61,12 @@ func (p *pg) Ping(ctx context.Context) error {
 }
 
 func (p *pg) ExecContext(ctx context.Context, q Query, args ...interface{}) (pgconn.CommandTag, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "Postgres.ExecContext")
+	defer span.Finish()
+
+	span.SetTag("query", q)
+	span.SetTag("args", args)
+
 	log.Info(fmt.Sprintf("%s; %v", q.QueryRaw, args))
 
 	tx := ctx.Value(key)
@@ -73,6 +80,12 @@ func (p *pg) ExecContext(ctx context.Context, q Query, args ...interface{}) (pgc
 }
 
 func (p *pg) QueryContext(ctx context.Context, q Query, args ...interface{}) (pgx.Rows, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "Postgres.QueryContext")
+	defer span.Finish()
+
+	span.SetTag("query", q)
+	span.SetTag("args", args)
+
 	log.Info(fmt.Sprintf("%s; %v", q.QueryRaw, args))
 
 	tx := ctx.Value(key)
@@ -86,6 +99,12 @@ func (p *pg) QueryContext(ctx context.Context, q Query, args ...interface{}) (pg
 }
 
 func (p *pg) QueryRowContext(ctx context.Context, q Query, args ...interface{}) pgx.Row {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "Postgres.QueryRowContext")
+	defer span.Finish()
+
+	span.SetTag("query", q)
+	span.SetTag("args", args)
+
 	log.Info(fmt.Sprintf("%s; %v", q.QueryRaw, args))
 
 	tx := ctx.Value(key)
@@ -99,6 +118,12 @@ func (p *pg) QueryRowContext(ctx context.Context, q Query, args ...interface{}) 
 }
 
 func (p *pg) ScanOneContext(ctx context.Context, dest interface{}, q Query, args ...interface{}) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "Postgres.ScanOneContext")
+	defer span.Finish()
+
+	span.SetTag("query", q)
+	span.SetTag("args", args)
+
 	rows, err := p.QueryContext(ctx, q, args...)
 	if err != nil {
 		return err
@@ -108,6 +133,12 @@ func (p *pg) ScanOneContext(ctx context.Context, dest interface{}, q Query, args
 }
 
 func (p *pg) ScanAllContext(ctx context.Context, dest interface{}, q Query, args ...interface{}) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "Postgres.ScanAllContext")
+	defer span.Finish()
+
+	span.SetTag("query", q)
+	span.SetTag("args", args)
+
 	rows, err := p.QueryContext(ctx, q, args...)
 	if err != nil {
 		return err
