@@ -11,10 +11,18 @@ services:
     depends_on:
       - checkout_postgres
       - checkout_pgbouncer
+      - jaeger
     ports:
       - "8080:8080"
       - "8088:8088"
       - "50052:50052"
+      - "7080:7080"
+    volumes:
+      - ./logs/data/checkout.txt:/log.txt
+    command:
+      - "/bin/sh"
+      - "-c"
+      - "/app 2>&1 | tee /log.txt"
 
   checkout_postgres:
     image: postgres:15.1
@@ -53,6 +61,7 @@ services:
       - service_network
     ports:
       - "50053:50053"
+      - "7081:7081"
     deploy:
       restart_policy:
         condition: on-failure
@@ -65,6 +74,14 @@ services:
         condition: service_healthy
       kafka3:
         condition: service_healthy
+      jaeger:
+        condition: service_started
+    volumes:
+      - ./logs/data/loms.txt:/log.txt
+    command:
+      - "/bin/sh"
+      - "-c"
+      - "/app 2>&1 | tee /log.txt"
 
   loms_postgres:
     image: postgres:15.1
@@ -97,6 +114,7 @@ services:
     build: ./notifications/
     ports:
       - "8082:8082"
+      - "7082:7082"
     networks:
       - service_network
     deploy:
@@ -111,6 +129,14 @@ services:
         condition: service_healthy
       kafka3:
         condition: service_healthy
+      jaeger:
+        condition: service_started
+    volumes:
+      - ./logs/data/loms.txt:/log.txt
+    command:
+      - "/bin/sh"
+      - "-c"
+      - "/app 2>&1 | tee /log.txt"
 
   # kafka
   zookeeper:
@@ -189,7 +215,7 @@ services:
       zookeeper:
         condition: service_healthy
     ports:
-      - "9093:9093"
+      - "9099:9099"
     networks:
       - service_network
     deploy:
@@ -199,12 +225,66 @@ services:
         max_attempts: 5
     environment:
       KAFKA_BROKER_ID: 3
-      KAFKA_LISTNERS: LISTNER_INT://kafka3:29093,LISTENER_EXT://0.0.0.0:9093
+      KAFKA_LISTNERS: LISTNER_INT://kafka3:29093,LISTENER_EXT://0.0.0.0:9099
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: LISTNER_INT://kafka3:29093,LISTENER_EXT://localhost:9093
+      KAFKA_ADVERTISED_LISTENERS: LISTNER_INT://kafka3:29093,LISTENER_EXT://localhost:9099
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTNER_INT:PLAINTEXT,LISTENER_EXT:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: LISTNER_INT
       ZOOKEEPER: zookeeper:2181
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.18
+    networks:
+      - service_network
+    ports:
+      - 5775:5775/udp
+      - 6831:6831/udp
+      - 6832:6832/udp
+      - 5778:5778
+      - 16686:16686 # web
+      - 14268:14268
+      - 9411:9411
+
+  prometheus:
+    image: prom/prometheus
+    networks:
+      - service_network
+    ports:
+      - 9090:9090
+    volumes:
+      - ./metrics/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./metrics/alerts.yml:/etc/prometheus/alerts.yml
+    extra_hosts:
+      - host.docker.internal:host-gateway
+
+
+  alertmanager:
+    image: prom/alertmanager
+    networks:
+      - service_network
+    ports:
+      - 9093:9093
+    volumes:
+      - ./metrics/alerts_tg.yml:/etc/alertmanager/alertmanager.yml
+    environment:
+      TZ: "Europe/Moscow"
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/etc/alertmanager/data'
+
+  grafana:
+    image: grafana/grafana-oss
+    networks:
+      - service_network
+    ports:
+      - 3000:3000
+    volumes:
+      - grafana-data:/var/lib/grafana
+    links:
+      - prometheus
 
 
 networks:
@@ -215,3 +295,5 @@ networks:
 volumes:
   checkout_postgres_data:
   loms_postgres_data:
+
+  grafana-data:

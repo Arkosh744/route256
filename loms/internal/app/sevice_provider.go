@@ -47,7 +47,7 @@ func (s *serviceProvider) GetRateLimiterWithPG(ctx context.Context) rate_limiter
 		s.GetPGClient(ctx),
 	)
 	if err != nil {
-		log.Fatalf("failed to create rate limiter with pg: %s", err)
+		log.Fatal("failed to create rate limiter with pg", zap.Error(err))
 	}
 
 	return rl
@@ -57,16 +57,16 @@ func (s *serviceProvider) GetPGClient(ctx context.Context) pg.Client {
 	if s.pgClient == nil {
 		pgCfg, err := pgxpool.ParseConfig(config.AppConfig.GetPostgresDSN())
 		if err != nil {
-			log.Fatalf("failed to parse pg config", zap.Error(err))
+			log.Fatal("failed to parse pg config", zap.Error(err))
 		}
 
 		cl, err := pg.NewClient(ctx, pgCfg)
 		if err != nil {
-			log.Fatalf("failed to get pg client", zap.Error(err))
+			log.Fatal("failed to get pg client", zap.Error(err))
 		}
 
 		if cl.PG().Ping(ctx) != nil {
-			log.Fatalf("failed to ping pg", zap.Error(err))
+			log.Fatal("failed to ping pg", zap.Error(err))
 		}
 
 		closer.Add(cl.Close)
@@ -142,7 +142,7 @@ func (s *serviceProvider) GetLomsService(ctx context.Context) LomsV1.Service {
 	if s.service == nil {
 		producer, err := s.GetKafkaSyncProducer()
 		if err != nil {
-			log.Fatalf("failed to get kafka sync producer: %s", err)
+			log.Fatal("failed to get kafka sync producer", zap.Error(err))
 		}
 
 		kafka := status.NewOrderStatusSender(producer, config.AppConfig.Kafka.Topic)

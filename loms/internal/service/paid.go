@@ -4,9 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 
 	"route256/libs/log"
 	"route256/loms/internal/models"
+
+	"go.uber.org/zap"
 )
 
 func (s *service) Paid(ctx context.Context, orderID int64) error {
@@ -21,7 +24,7 @@ func (s *service) Paid(ctx context.Context, orderID int64) error {
 	}
 
 	if err := s.kafka.SendOrderStatus(orderID, models.OrderStatusPaid); err != nil {
-		log.Errorf("failed to send order status: %v", err)
+		log.Error(ctx, "failed to send order status", zap.Error(err))
 
 		return err
 	}
@@ -45,20 +48,20 @@ func (s *service) payOrder(ctx context.Context, orderID int64) error {
 		}
 
 		if err := s.repo.UpdateOrderStatus(ctx, orderID, models.OrderStatusPaid); err != nil {
-			log.Errorf("failed to update order %d status to 'canceled': %v", orderID, err)
+			log.Error(ctx, fmt.Sprintf("failed to update order %d status to 'canceled'", orderID), zap.Error(err))
 
 			return err
 		}
 
 		if err := s.repo.DeleteReservation(ctx, orderID); err != nil {
-			log.Errorf("failed to delete reservation for order %d: %v", orderID, err)
+			log.Error(ctx, fmt.Sprintf("failed to delete reservation for order %d", orderID), zap.Error(err))
 
 			return err
 		}
 
 		return nil
 	}); err != nil {
-		log.Errorf("failed to cancel order %d: %v", orderID, err)
+		log.Error(ctx, fmt.Sprintf("failed to cancel order %d", orderID), zap.Error(err))
 
 		return err
 	}

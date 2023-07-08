@@ -8,12 +8,20 @@ import (
 	desc "route256/pkg/loms_v1"
 
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/opentracing/opentracing-go"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 func (i *Implementation) CancelOrder(ctx context.Context, orderID *desc.OrderIDRequest) (*empty.Empty, error) {
-	if err := i.lomsService.Cancel(ctx, orderID.GetOrderId()); err != nil {
+	id := orderID.GetOrderId()
+
+	span := opentracing.SpanFromContext(ctx)
+	if span != nil {
+		span.SetTag("orderID", id)
+	}
+
+	if err := i.lomsService.Cancel(ctx, id); err != nil {
 		if errors.Is(err, service.ErrOrderNotFound) {
 			return nil, status.Errorf(codes.NotFound, "order not found: %v", err)
 		}

@@ -10,6 +10,7 @@ import (
 	"route256/loms/internal/models"
 
 	"go.uber.org/multierr"
+	"go.uber.org/zap"
 )
 
 func (s *service) Create(ctx context.Context, user int64, items []models.Item) (int64, error) {
@@ -19,7 +20,7 @@ func (s *service) Create(ctx context.Context, user int64, items []models.Item) (
 	}
 
 	if err = s.kafka.SendOrderStatus(orderID, models.OrderStatusNew); err != nil {
-		log.Errorf("failed to send order status: %v", err)
+		log.Error(ctx, "failed to send order status", zap.Error(err))
 
 		return 0, err
 	}
@@ -35,7 +36,7 @@ func (s *service) Create(ctx context.Context, user int64, items []models.Item) (
 		return nil
 	}); err != nil {
 		if err = s.kafka.SendOrderStatus(orderID, models.OrderStatusFailed); err != nil {
-			log.Errorf("failed to send order status: %v", err)
+			log.Error(ctx, "failed to send order status", zap.Error(err))
 
 			err = multierr.Append(err, fmt.Errorf("failed to send order status: %w", err))
 		}
@@ -48,7 +49,7 @@ func (s *service) Create(ctx context.Context, user int64, items []models.Item) (
 	}
 
 	if err = s.kafka.SendOrderStatus(orderID, models.OrderStatusAwaitingPayment); err != nil {
-		log.Errorf("failed to send order status: %v", err)
+		log.Error(ctx, "failed to send order status", zap.Error(err))
 
 		return 0, err
 	}
@@ -162,7 +163,7 @@ func (s *service) orderTimeoutFunc(ctx context.Context, orderID int64) func() {
 
 		// waiting for allow from rate limiter
 		if err := s.rl.Wait(ctx); err != nil {
-			log.Errorf("failed to wait for rate limiter: %v", err)
+			log.Error(ctx, "failed to wait for rate limiter", zap.Error(err))
 
 			return
 		}

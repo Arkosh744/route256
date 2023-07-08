@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"net"
 	"os"
 
 	"gopkg.in/yaml.v3"
@@ -10,6 +11,11 @@ import (
 const pathToConfig = "config.yaml"
 
 type Config struct {
+	Metrics struct {
+		Host string `yaml:"host"`
+		Port string `yaml:"port"`
+	} `yaml:"metrics"`
+
 	Kafka struct {
 		Brokers []string `yaml:"brokers"`
 		Topic   string   `yaml:"topic"`
@@ -19,6 +25,10 @@ type Config struct {
 		Token  string `yaml:"token"`
 		ChatID int64  `yaml:"chatId"`
 	} `yaml:"tg"`
+
+	Log struct {
+		Preset string `yaml:"preset"`
+	} `yaml:"log"`
 }
 
 var AppConfig = Config{}
@@ -34,4 +44,8 @@ func Init() error {
 	}
 
 	return nil
+}
+
+func (c *Config) GetMetricsAddr() string {
+	return net.JoinHostPort(c.Metrics.Host, c.Metrics.Port)
 }

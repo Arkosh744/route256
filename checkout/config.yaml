@@ -10,6 +10,13 @@ http:
 swagger:
   host: "0.0.0.0"
   port: 8088
+metrics:
+  host: "0.0.0.0"
+  port: 7080
+jaeger:
+  host: "0.0.0.0"
+  port: 6831
+
 postgres:
   host: checkout_pgbouncer
   port: 5432
@@ -29,4 +36,4 @@ rateLimit:
   periodRaw: 1s
 
 log:
-  preset: "dev"
+  preset: "prod"

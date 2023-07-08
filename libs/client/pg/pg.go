@@ -2,6 +2,7 @@ package pg
 
 import (
 	"context"
+	"fmt"
 
 	"route256/libs/log"
 
@@ -59,7 +60,7 @@ func (p *pg) Ping(ctx context.Context) error {
 }
 
 func (p *pg) ExecContext(ctx context.Context, q Query, args ...interface{}) (pgconn.CommandTag, error) {
-	log.Infof("%s; %v", q.QueryRaw, args)
+	log.Info(fmt.Sprintf("%s; %v", q.QueryRaw, args))
 
 	tx := ctx.Value(key)
 	if tx != nil {
@@ -72,7 +73,7 @@ func (p *pg) ExecContext(ctx context.Context, q Query, args ...interface{}) (pgc
 }
 
 func (p *pg) QueryContext(ctx context.Context, q Query, args ...interface{}) (pgx.Rows, error) {
-	log.Infof("%s; %v", q.QueryRaw, args)
+	log.Info(fmt.Sprintf("%s; %v", q.QueryRaw, args))
 
 	tx := ctx.Value(key)
 	if tx != nil {
@@ -85,7 +86,7 @@ func (p *pg) QueryContext(ctx context.Context, q Query, args ...interface{}) (pg
 }
 
 func (p *pg) QueryRowContext(ctx context.Context, q Query, args ...interface{}) pgx.Row {
-	log.Infof("%s; %v", q.QueryRaw, args)
+	log.Info(fmt.Sprintf("%s; %v", q.QueryRaw, args))
 
 	tx := ctx.Value(key)
 	if tx != nil {

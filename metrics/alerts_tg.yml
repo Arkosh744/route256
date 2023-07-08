@@ -1,0 +1,11 @@
+route:
+  group_by: ['alertname', 'instance', 'severity']
+  receiver: 'telegram'
+
+receivers:
+  - name: 'telegram'
+    telegram_configs:
+      - bot_token: '1844252744:AAHkUqVCSCPN8alP5-R2hHu0tzHYeL9mNjQ'
+        api_url: https://api.telegram.org
+        chat_id: -1001980779808
+        parse_mode: ''

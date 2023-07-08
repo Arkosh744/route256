@@ -8,3 +8,13 @@ kafka:
 tg:
   token: "1844252744:AAHkUqVCSCPN8alP5-R2hHu0tzHYeL9mNjQ"
   chatId: -1001980779808
+
+metrics:
+  host: "0.0.0.0"
+  port: 7082
+jaeger:
+  host: "0.0.0.0"
+  port: 6831
+
+log:
+  preset: "prod"
