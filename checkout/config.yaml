@@ -32,7 +32,7 @@ services:
 workers: 2
 
 rateLimit:
-  limit: 2
+  limit: 5
   periodRaw: 1s
 
 log:
