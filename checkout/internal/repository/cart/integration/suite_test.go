@@ -45,18 +45,18 @@ func (s *Suite) SetupSuite() {
 
 	ctx := context.Background()
 	if err := log.InitLogger(ctx, logPreset); err != nil {
-		l.Fatalf("failed to init logger %v", zap.Error(err))
+		l.Fatalf("failed to init logger %v", err)
 	}
 
 	// Get postgres container
 
 	pool, err := dockertest.NewPool("")
 	if err != nil {
-		log.Fatalf("Could not connect to docker: %s", err)
+		log.Fatal("Could not connect to docker", zap.Error(err))
 	}
 
 	if err = pool.Client.Ping(); err != nil {
-		log.Fatalf("Could not connect to Docker: %s", err)
+		log.Fatal("Could not connect to Docker", zap.Error(err))
 	}
 
 	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
@@ -68,7 +68,7 @@ func (s *Suite) SetupSuite() {
 		config.RestartPolicy = docker.RestartPolicy{Name: "no"}
 	})
 	if err != nil {
-		log.Fatalf("Could not start resource: %s", err)
+		log.Fatal("Could not start resource", zap.Error(err))
 	}
 
 	s.pool = pool
@@ -78,7 +78,7 @@ func (s *Suite) SetupSuite() {
 
 	pgCfg, err := pgxpool.ParseConfig(dsn)
 	if err != nil {
-		log.Fatalf("failed to parse pg config %v", zap.Error(err))
+		log.Fatal("failed to parse pg config", zap.Error(err))
 	}
 
 	if err = pool.Retry(func() error {
@@ -90,21 +90,21 @@ func (s *Suite) SetupSuite() {
 
 		return pgClient.PG().Ping(ctx)
 	}); err != nil {
-		log.Fatalf("Could not connect to pg docker: %s", err)
+		log.Fatal("Could not connect to pg docker", zap.Error(err))
 	}
 
 	migrationCmd := exec.Command("goose", "postgres", dsn, "up")
 	migrationCmd.Dir = migrationsPath
 
 	if err = migrationCmd.Run(); err != nil {
-		log.Fatalf("failed to run migrations: %v", zap.Error(err))
+		log.Fatal("failed to run migrations", zap.Error(err))
 	}
 
-	log.Infof("migrations applied successfully")
+	log.Info("migrations applied successfully")
 
 	db, err := pg.NewClient(ctx, pgCfg)
 	if err != nil {
-		log.Fatalf("failed to create pg client %v", zap.Error(err))
+		log.Fatal("failed to create pg client", zap.Error(err))
 	}
 
 	s.repo = cart.NewRepo(db)
@@ -112,7 +112,7 @@ func (s *Suite) SetupSuite() {
 
 func (s *Suite) TearDownSuite() {
 	if err := s.pool.Purge(s.resource); err != nil {
-		log.Fatalf("Could not purge resource: %s", err)
+		log.Fatal("Could not purge resource", zap.Error(err))
 	}
 }
 

@@ -86,6 +86,16 @@ regenerate_mocks:
 	cd loms && go generate -run="mockgen .*" -x ./...
 	cd libs && go generate -run="mockgen .*" -x ./...
 
+.PHONY: logs
+logs:
+	mkdir -p logs/data
+	touch logs/data/checkout.txt
+	touch logs/data/loms.txt
+	touch logs/data/notifications.txt
+	touch logs/data/offsets.yaml
+	sudo chmod -R 777 logs/data
+	cd logs && sudo docker compose up
+
 precommit:
 	cd checkout && make precommit
 	cd loms && make precommit

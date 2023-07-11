@@ -18,6 +18,16 @@ type Config struct {
 		Port string `yaml:"port"`
 	} `yaml:"grpc"`
 
+	Metrics struct {
+		Host string `yaml:"host"`
+		Port string `yaml:"port"`
+	} `yaml:"metrics"`
+
+	Jaeger struct {
+		Host string `yaml:"host"`
+		Port string `yaml:"port"`
+	} `yaml:"jaeger"`
+
 	Postgres struct {
 		Host     string `yaml:"host"`
 		Port     string `yaml:"port"`
@@ -80,4 +90,12 @@ func (c *Config) getReqLimitPeriod() error {
 	c.RateLimit.Period = dur
 
 	return nil
+}
+
+func (c *Config) GetMetricsAddr() string {
+	return net.JoinHostPort(c.Metrics.Host, c.Metrics.Port)
+}
+
+func (c *Config) GetJaegerAddr() string {
+	return net.JoinHostPort(c.Jaeger.Host, c.Jaeger.Port)
 }

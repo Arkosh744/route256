@@ -7,6 +7,7 @@ import (
 	"route256/libs/log"
 
 	"github.com/Shopify/sarama"
+	"go.uber.org/zap"
 )
 
 type OrderStatusSender struct {
@@ -37,7 +38,12 @@ func (o OrderStatusSender) SendOrderStatus(orderID int64, status string) error {
 		return err
 	}
 
-	log.Infof("order id: %d, status: %v, partition: %d, offset: %d", orderID, status, partition, offset)
+	log.Info("notification sent",
+		zap.Int64("orderID", orderID),
+		zap.String("status", status),
+		zap.Int32("partition", partition),
+		zap.Int64("offset", offset),
+	)
 
 	return nil
 }

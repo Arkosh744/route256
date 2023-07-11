@@ -2,11 +2,10 @@ package app
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/jackc/pgx/v4/pgxpool"
-	"go.uber.org/zap"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
+	"github.com/grpc-ecosystem/grpc-opentracing/go/otgrpc"
+
 	checkoutV1 "route256/checkout/internal/api/checkout_v1"
 	"route256/checkout/internal/clients/loms"
 	"route256/checkout/internal/clients/ps"
@@ -19,6 +18,12 @@ import (
 	"route256/libs/rate_limiter"
 	lomsV1 "route256/pkg/loms_v1"
 	productV1 "route256/pkg/product_v1"
+
+	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/opentracing/opentracing-go"
+	"go.uber.org/zap"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type serviceProvider struct {
@@ -41,16 +46,16 @@ func (s *serviceProvider) GetPGClient(ctx context.Context) pg.Client {
 	if s.pgClient == nil {
 		pgCfg, err := pgxpool.ParseConfig(config.AppConfig.GetPostgresDSN())
 		if err != nil {
-			log.Fatalf("failed to parse pg config", zap.Error(err))
+			log.Fatal("failed to parse pg config", zap.Error(err))
 		}
 
 		cl, err := pg.NewClient(ctx, pgCfg)
 		if err != nil {
-			log.Fatalf("failed to get pg client", zap.Error(err))
+			log.Fatal("failed to get pg client", zap.Error(err))
 		}
 
 		if cl.PG().Ping(ctx) != nil {
-			log.Fatalf("failed to ping pg", zap.Error(err))
+			log.Fatal("failed to ping pg", zap.Error(err))
 		}
 
 		closer.Add(cl.Close)
@@ -75,9 +80,10 @@ func (s *serviceProvider) GetLomsClient(ctx context.Context) service.LomsClient 
 			ctx,
 			config.AppConfig.Services.Loms,
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
+			grpc.WithUnaryInterceptor(otgrpc.OpenTracingClientInterceptor(opentracing.GlobalTracer())),
 		)
 		if err != nil {
-			log.Fatalf("failed to connect %s: %s", config.AppConfig.Services.Loms, err)
+			log.Fatal("failed to connect", zap.String("loms.client", config.AppConfig.Services.Loms), zap.Error(err))
 		}
 
 		closer.Add(conn.Close)
@@ -85,7 +91,7 @@ func (s *serviceProvider) GetLomsClient(ctx context.Context) service.LomsClient 
 		lomsClient := lomsV1.NewLomsClient(conn)
 		s.loms = loms.New(lomsClient)
 
-		log.Infof("loms client created and connected %s", config.AppConfig.Services.Loms)
+		log.Info(fmt.Sprintf("loms client created and connected %s", config.AppConfig.Services.Loms))
 	}
 
 	return s.loms
@@ -105,7 +111,7 @@ func (s *serviceProvider) GetRateLimiterWithPG(ctx context.Context) rate_limiter
 		s.GetPGClient(ctx),
 	)
 	if err != nil {
-		log.Fatalf("failed to create rate limiter with pg: %s", err)
+		log.Fatal("failed to create rate limiter with pg", zap.Error(err))
 	}
 
 	return rl
@@ -117,9 +123,10 @@ func (s *serviceProvider) GetPSClient(ctx context.Context) service.PSClient {
 			ctx,
 			config.AppConfig.Services.ProductService,
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
+			grpc.WithUnaryInterceptor(otgrpc.OpenTracingClientInterceptor(opentracing.GlobalTracer())),
 		)
 		if err != nil {
-			log.Fatalf("failed to connect %s: %s", config.AppConfig.Services.ProductService, err)
+			log.Fatal("failed to connect", zap.String("ps.client", config.AppConfig.Services.ProductService), zap.Error(err))
 		}
 
 		closer.Add(conn.Close)
@@ -128,7 +135,7 @@ func (s *serviceProvider) GetPSClient(ctx context.Context) service.PSClient {
 
 		s.ps = ps.New(psClient, s.GetRateLimiterWithPG(ctx))
 
-		log.Infof("ps client created and connected %s", config.AppConfig.Services.ProductService)
+		log.Info(fmt.Sprintf("ps client created and connected %s", config.AppConfig.Services.ProductService))
 	}
 
 	return s.ps

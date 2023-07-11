@@ -2,6 +2,7 @@ package ps
 
 import (
 	"context"
+	"fmt"
 
 	"route256/checkout/internal/config"
 	"route256/checkout/internal/converter"
@@ -58,7 +59,7 @@ func (c *client) GetProducts(ctx context.Context, userItems []models.ItemData) [
 }
 
 func (c *client) getProduct(ctx context.Context, sku uint32) (*models.ItemInfo, error) {
-	log.Infof("get product from ps: sku %d", sku)
+	log.Info(fmt.Sprintf("get product from ps: sku %d", sku))
 
 	// waiting for allow from rate limiter
 	if err := c.rl.Wait(ctx); err != nil {

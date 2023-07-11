@@ -2,3 +2,4 @@
 
 bin/
 vendor.protogen/
+logs/data/

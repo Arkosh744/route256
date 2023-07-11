@@ -9,6 +9,7 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v4"
+	"github.com/opentracing/opentracing-go"
 )
 
 const tableName = "items"
@@ -22,6 +23,13 @@ func NewRepo(client pg.Client) *Repository {
 }
 
 func (r *Repository) AddToCart(ctx context.Context, user int64, item *models.ItemData) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "Checkout.Repo.AddToCart")
+	defer span.Finish()
+
+	span.SetTag("userID", user)
+	span.SetTag("SKU", item.SKU)
+	span.SetTag("count", item.Count)
+
 	builder := sq.Insert(tableName).
 		PlaceholderFormat(sq.Dollar).
 		Columns("user_id", "sku", "count").
@@ -46,6 +54,12 @@ func (r *Repository) AddToCart(ctx context.Context, user int64, item *models.Ite
 }
 
 func (r *Repository) GetCount(ctx context.Context, user int64, sku uint32) (uint16, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "Checkout.Repo.GetCount")
+	defer span.Finish()
+
+	span.SetTag("userID", user)
+	span.SetTag("SKU", sku)
+
 	builder := sq.Select("count").From(tableName).
 		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{"user_id": user, "sku": sku}).
@@ -70,6 +84,11 @@ func (r *Repository) GetCount(ctx context.Context, user int64, sku uint32) (uint
 }
 
 func (r *Repository) GetUserCart(ctx context.Context, user int64) ([]models.ItemData, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "Checkout.Repo.GetUserCart")
+	defer span.Finish()
+
+	span.SetTag("userID", user)
+
 	builder := sq.Select("sku", "count").From(tableName).
 		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{"user_id": user})
@@ -93,6 +112,13 @@ func (r *Repository) GetUserCart(ctx context.Context, user int64) ([]models.Item
 }
 
 func (r *Repository) DeleteFromCart(ctx context.Context, user int64, item *models.ItemData) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "Checkout.Repo.DeleteFromCart")
+	defer span.Finish()
+
+	span.SetTag("userID", user)
+	span.SetTag("SKU", item.SKU)
+	span.SetTag("count", item.Count)
+
 	if err := r.client.RunRepeatableRead(ctx, func(ctx context.Context) error {
 		count, err := r.GetCount(ctx, user, item.SKU)
 		if err != nil {
@@ -118,6 +144,13 @@ func (r *Repository) DeleteFromCart(ctx context.Context, user int64, item *model
 }
 
 func (r *Repository) deleteItemFromCart(ctx context.Context, user int64, item *models.ItemData) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "Checkout.Repo.deleteItemFromCart")
+	defer span.Finish()
+
+	span.SetTag("userID", user)
+	span.SetTag("SKU", item.SKU)
+	span.SetTag("count", item.Count)
+
 	builder := sq.Delete(tableName).
 		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{"user_id": user, "sku": item.SKU})
@@ -140,6 +173,14 @@ func (r *Repository) deleteItemFromCart(ctx context.Context, user int64, item *m
 }
 
 func (r *Repository) removeItemsFromCart(ctx context.Context, user int64, count uint16, item *models.ItemData) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "Checkout.Repo.removeItemsFromCart")
+	defer span.Finish()
+
+	span.SetTag("userID", user)
+	span.SetTag("SKU", item.SKU)
+	span.SetTag("count", item.Count)
+	span.SetTag("NewCount", count-item.Count)
+
 	builder := sq.Update(tableName).
 		PlaceholderFormat(sq.Dollar).
 		Set("count", count-item.Count).
@@ -163,6 +204,11 @@ func (r *Repository) removeItemsFromCart(ctx context.Context, user int64, count 
 }
 
 func (r *Repository) DeleteUserCart(ctx context.Context, user int64) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "Checkout.Repo.DeleteUserCart")
+	defer span.Finish()
+
+	span.SetTag("userID", user)
+
 	builder := sq.Delete(tableName).
 		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{"user_id": user})

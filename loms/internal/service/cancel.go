@@ -8,6 +8,8 @@ import (
 
 	"route256/libs/log"
 	"route256/loms/internal/models"
+
+	"go.uber.org/zap"
 )
 
 func (s *service) Cancel(ctx context.Context, orderID int64) error {
@@ -16,7 +18,7 @@ func (s *service) Cancel(ctx context.Context, orderID int64) error {
 			return err
 		}
 
-		log.Errorf("failed to cancel order %d: %v", orderID, err)
+		log.Error(ctx, fmt.Sprintf("failed to cancel order %d", orderID), zap.Error(err))
 
 		return err
 	}
@@ -28,7 +30,7 @@ func (s *service) Cancel(ctx context.Context, orderID int64) error {
 	}
 
 	if err := s.kafka.SendOrderStatus(orderID, models.OrderStatusCanceled); err != nil {
-		log.Errorf("failed to send order status: %v", err)
+		log.Error(ctx, "failed to send order status", zap.Error(err))
 
 		return err
 	}
