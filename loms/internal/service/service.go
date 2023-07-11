@@ -1,3 +1,4 @@
+//go:generate mockgen -package=service -destination=./service_mock_internal_test.go -source=${GOFILE}
 package service
 
 import (
@@ -8,24 +9,27 @@ import (
 	"route256/libs/client/pg"
 	"route256/libs/rate_limiter"
 	"route256/loms/internal/models"
+	"route256/loms/internal/notifications/status"
 )
 
 type service struct {
 	repo      Repository
 	storage   orderStorage
 	txManager pg.TxManager
+	kafka     OrderStatusSender
 
 	rl rate_limiter.RateLimiter
 }
 
-func New(repo Repository, tx pg.TxManager, rl rate_limiter.RateLimiter) *service {
+func New(repo Repository, tx pg.TxManager, kafka status.OrderStatusSender, rl rate_limiter.RateLimiter) *service {
 	return &service{
 		repo:      repo,
 		txManager: tx,
 		storage: orderStorage{
 			storage: make(map[int64]*orderStatus),
 		},
-		rl: rl,
+		kafka: kafka,
+		rl:    rl,
 	}
 }
 
@@ -44,6 +48,10 @@ type Repository interface {
 	InsertStock(ctx context.Context, item models.ReservationItem) error
 	UpdateStock(ctx context.Context, warehouseID int64, sku uint32, count uint64) error
 	DeleteStock(ctx context.Context, warehouseID int64, sku uint32) error
+}
+
+type OrderStatusSender interface {
+	SendOrderStatus(orderID int64, status string) error
 }
 
 // orderStorage is a storage for orders to cancel them after timeout.

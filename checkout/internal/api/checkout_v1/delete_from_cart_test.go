@@ -1,5 +1,3 @@
-//+build unit
-
 package checkout_v1
 
 import (

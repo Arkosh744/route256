@@ -1,0 +1,10 @@
+kafka:
+  brokers:
+    - kafka1:29091
+    - kafka2:29092
+    - kafka3:29093
+  topic: "loms"
+
+tg:
+  token: "1844252744:AAHkUqVCSCPN8alP5-R2hHu0tzHYeL9mNjQ"
+  chatId: -1001980779808

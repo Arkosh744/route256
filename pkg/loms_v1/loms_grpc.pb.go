@@ -25,7 +25,7 @@ const _ = grpc.SupportPackageIsVersion7
 type LomsClient interface {
 	CreateOrder(ctx context.Context, in *CreateOrderRequest, opts ...grpc.CallOption) (*CreateOrderResponse, error)
 	ListOrder(ctx context.Context, in *OrderIDRequest, opts ...grpc.CallOption) (*ListOrderResponse, error)
-	OrderPayed(ctx context.Context, in *OrderIDRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	OrderPaid(ctx context.Context, in *OrderIDRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	CancelOrder(ctx context.Context, in *OrderIDRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	Stocks(ctx context.Context, in *StocksRequest, opts ...grpc.CallOption) (*StocksResponse, error)
 }
@@ -56,7 +56,7 @@ func (c *lomsClient) ListOrder(ctx context.Context, in *OrderIDRequest, opts ...
 	return out, nil
 }
 
-func (c *lomsClient) OrderPayed(ctx context.Context, in *OrderIDRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+func (c *lomsClient) OrderPaid(ctx context.Context, in *OrderIDRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
 	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, "/route256.loms.Loms/OrderPaid", in, out, opts...)
 	if err != nil {
@@ -163,7 +163,7 @@ func _Loms_ListOrder_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Loms_OrderPayed_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Loms_OrderPaid_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(OrderIDRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -234,7 +234,7 @@ var Loms_ServiceDesc = grpc.ServiceDesc{
 		},
 		{
 			MethodName: "OrderPaid",
-			Handler:    _Loms_OrderPayed_Handler,
+			Handler:    _Loms_OrderPaid_Handler,
 		},
 		{
 			MethodName: "CancelOrder",

@@ -27,6 +27,11 @@ type Config struct {
 		SSLMode  string `yaml:"sslmode"`
 	} `yaml:"postgres"`
 
+	Kafka struct {
+		Brokers []string `yaml:"brokers"`
+		Topic   string   `yaml:"topic"`
+	} `yaml:"kafka"`
+
 	RateLimit struct {
 		Limit     int           `yaml:"limit"`
 		PeriodRaw string        `yaml:"periodRaw"`

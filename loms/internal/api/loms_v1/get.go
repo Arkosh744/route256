@@ -18,4 +18,3 @@ func (i *Implementation) ListOrder(ctx context.Context, req *desc.OrderIDRequest
 
 	return converter.ToOrderDesc(res), nil
 }
-

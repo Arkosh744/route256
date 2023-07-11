@@ -3,11 +3,13 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
-	"go.uber.org/multierr"
 	"route256/libs/log"
 	"route256/loms/internal/models"
+
+	"go.uber.org/multierr"
 )
 
 func (s *service) Create(ctx context.Context, user int64, items []models.Item) (int64, error) {
@@ -16,19 +18,37 @@ func (s *service) Create(ctx context.Context, user int64, items []models.Item) (
 		return 0, err
 	}
 
+	if err = s.kafka.SendOrderStatus(orderID, models.OrderStatusNew); err != nil {
+		log.Errorf("failed to send order status: %v", err)
+
+		return 0, err
+	}
+
 	if err = s.txManager.RunRepeatableRead(ctx, func(ctx context.Context) error {
 		if txErr := s.processOrderItems(ctx, orderID, items); txErr != nil {
 			return txErr
 		}
 
-		//nolint:contextcheck // we start new context inside with cancel func because current ctx is dead after tx commit
+		//nolint:contextcheck // we start new context inside with cancel func because current ctx is dead after tx commit.
 		s.startPaymentTimeout(orderID)
 
 		return nil
 	}); err != nil {
+		if err = s.kafka.SendOrderStatus(orderID, models.OrderStatusFailed); err != nil {
+			log.Errorf("failed to send order status: %v", err)
+
+			err = multierr.Append(err, fmt.Errorf("failed to send order status: %w", err))
+		}
+
 		if txErr := s.repo.UpdateOrderStatus(ctx, orderID, models.OrderStatusFailed); txErr != nil {
 			err = multierr.Append(err, errors.New("failed to update order status to 'failed'"))
 		}
+
+		return 0, err
+	}
+
+	if err = s.kafka.SendOrderStatus(orderID, models.OrderStatusAwaitingPayment); err != nil {
+		log.Errorf("failed to send order status: %v", err)
 
 		return 0, err
 	}

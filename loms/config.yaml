@@ -10,6 +10,13 @@ postgres:
   database: loms-db
   sslmode: disable
 
+kafka:
+  brokers:
+    - kafka1:29091
+    - kafka2:29092
+    - kafka3:29093
+  topic: "loms"
+
 rateLimit:
   limit: 2
   periodRaw: 1s

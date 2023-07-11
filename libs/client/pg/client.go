@@ -1,3 +1,4 @@
+//go:generate mockgen -package=pg -destination=./client_mock.go -source=${GOFILE}
 package pg
 
 import (
