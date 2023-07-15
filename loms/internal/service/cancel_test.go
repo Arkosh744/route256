@@ -61,6 +61,7 @@ func Test_service_Cancel(t *testing.T) {
 				m.EXPECT().GetReservations(ctx, int64(1)).Return([]models.ReservationItem{}, nil).Times(1)
 				m.EXPECT().DeleteReservation(ctx, int64(1)).Return(nil).Times(1)
 				m.EXPECT().UpdateOrderStatus(ctx, int64(1), models.OrderStatusCanceled).Return(nil).Times(1)
+				m.EXPECT().UpdateOrderStatusHistory(ctx, int64(1), models.OrderStatusCanceled).Return(nil).Times(1)
 			},
 			txManagerMock: func(m *pg.MockTxManager) {
 				m.EXPECT().RunRepeatableRead(ctx, gomock.Any()).DoAndReturn(

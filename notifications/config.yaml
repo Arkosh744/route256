@@ -1,3 +1,18 @@
+grpc:
+  host: "0.0.0.0"
+  port: 50055
+redis:
+  host: notifications_redis
+  port: 6379
+
+postgres:
+  host: loms_pgbouncer
+  port: 5432
+  user: loms-user
+  password: loms-pass
+  database: loms-db
+  sslmode: disable
+
 kafka:
   brokers:
     - kafka1:29091
@@ -17,4 +32,4 @@ jaeger:
   port: 6831
 
 log:
-  preset: "prod"
+  preset: "dev"

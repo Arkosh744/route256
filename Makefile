@@ -14,6 +14,7 @@ generate:
 	mkdir -p pkg/swagger
 	make generate-checkout-api
 	make generate-loms-api
+	make generate-notifications-api
 	make generate-product-api
 	mkdir -p pkg/statik
 	./bin/statik -src=pkg/swagger -include='*.css,*.html,*.js,*.json,*.png'
@@ -47,6 +48,17 @@ generate-loms-api:
 	--validate_out lang=go:pkg/loms_v1 --validate_opt=paths=source_relative \
 	--plugin=protoc-gen-validate=bin/protoc-gen-validate \
 	api/loms_v1/loms.proto
+
+generate-notifications-api:
+	mkdir -p pkg/notifications_v1
+	protoc --proto_path api/notifications_v1 --proto_path vendor.protogen \
+	--go_out=pkg/notifications_v1 --go_opt=paths=source_relative \
+	--plugin=protoc-gen-go=bin/protoc-gen-go \
+	--go-grpc_out=pkg/notifications_v1 --go-grpc_opt=paths=source_relative \
+	--plugin=protoc-gen-go-grpc=bin/protoc-gen-go-grpc \
+	--validate_out lang=go:pkg/notifications_v1 --validate_opt=paths=source_relative \
+	--plugin=protoc-gen-validate=bin/protoc-gen-validate \
+	api/notifications_v1/notifications.proto
 
 generate-product-api:
 	mkdir -p pkg/product_v1

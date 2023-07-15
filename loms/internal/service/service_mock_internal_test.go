@@ -64,6 +64,20 @@ func (mr *MockRepositoryMockRecorder) CreateOrderItems(ctx, orderID, items inter
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateOrderItems", reflect.TypeOf((*MockRepository)(nil).CreateOrderItems), ctx, orderID, items)
 }
 
+// CreateOrderStatusHistory mocks base method.
+func (m *MockRepository) CreateOrderStatusHistory(ctx context.Context, user, orderId int64, status string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateOrderStatusHistory", ctx, user, orderId, status)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateOrderStatusHistory indicates an expected call of CreateOrderStatusHistory.
+func (mr *MockRepositoryMockRecorder) CreateOrderStatusHistory(ctx, user, orderId, status interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateOrderStatusHistory", reflect.TypeOf((*MockRepository)(nil).CreateOrderStatusHistory), ctx, user, orderId, status)
+}
+
 // CreateReservation mocks base method.
 func (m *MockRepository) CreateReservation(ctx context.Context, orderID, warID int64, sku uint32, count uint64) error {
 	m.ctrl.T.Helper()
@@ -192,6 +206,20 @@ func (m *MockRepository) UpdateOrderStatus(ctx context.Context, orderID int64, s
 func (mr *MockRepositoryMockRecorder) UpdateOrderStatus(ctx, orderID, status interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateOrderStatus", reflect.TypeOf((*MockRepository)(nil).UpdateOrderStatus), ctx, orderID, status)
+}
+
+// UpdateOrderStatusHistory mocks base method.
+func (m *MockRepository) UpdateOrderStatusHistory(ctx context.Context, orderId int64, status string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateOrderStatusHistory", ctx, orderId, status)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateOrderStatusHistory indicates an expected call of UpdateOrderStatusHistory.
+func (mr *MockRepositoryMockRecorder) UpdateOrderStatusHistory(ctx, orderId, status interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateOrderStatusHistory", reflect.TypeOf((*MockRepository)(nil).UpdateOrderStatusHistory), ctx, orderId, status)
 }
 
 // UpdateStock mocks base method.

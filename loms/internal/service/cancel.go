@@ -72,6 +72,10 @@ func (s *service) cancelOrderAndRestock(ctx context.Context, orderID int64) erro
 			return fmt.Errorf("failed to delete reservation for order %d: %w", orderID, err)
 		}
 
+		if err = s.repo.UpdateOrderStatusHistory(ctx, orderID, models.OrderStatusCanceled); err != nil {
+			return fmt.Errorf("failed to update order %d status to 'canceled': %w", orderID, err)
+		}
+
 		return nil
 	}); err != nil {
 		return err

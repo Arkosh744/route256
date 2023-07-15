@@ -19,6 +19,10 @@ func (s *service) Create(ctx context.Context, user int64, items []models.Item) (
 		return 0, err
 	}
 
+	if err = s.repo.CreateOrderStatusHistory(ctx, user, orderID, models.OrderStatusNew); err != nil {
+		log.Error(ctx, "failed to create order status history", zap.Error(err))
+	}
+
 	if err = s.kafka.SendOrderStatus(orderID, models.OrderStatusNew); err != nil {
 		log.Error(ctx, "failed to send order status", zap.Error(err))
 
@@ -35,15 +39,20 @@ func (s *service) Create(ctx context.Context, user int64, items []models.Item) (
 
 		return nil
 	}); err != nil {
+		if txErr := s.repo.UpdateOrderStatus(ctx, orderID, models.OrderStatusFailed); txErr != nil {
+			err = multierr.Append(err, errors.New("failed to update order status to 'failed'"))
+		}
+
+		if txErr := s.repo.UpdateOrderStatusHistory(ctx, orderID, models.OrderStatusFailed); txErr != nil {
+			err = multierr.Append(err, errors.New("failed to update order status history to 'failed'"))
+		}
+
 		if err = s.kafka.SendOrderStatus(orderID, models.OrderStatusFailed); err != nil {
 			log.Error(ctx, "failed to send order status", zap.Error(err))
 
 			err = multierr.Append(err, fmt.Errorf("failed to send order status: %w", err))
 		}
 
-		if txErr := s.repo.UpdateOrderStatus(ctx, orderID, models.OrderStatusFailed); txErr != nil {
-			err = multierr.Append(err, errors.New("failed to update order status to 'failed'"))
-		}
 
 		return 0, err
 	}
@@ -67,6 +76,10 @@ func (s *service) processOrderItems(ctx context.Context, orderID int64, items []
 	}
 
 	if err := s.repo.UpdateOrderStatus(ctx, orderID, models.OrderStatusAwaitingPayment); err != nil {
+		return err
+	}
+
+	if err := s.repo.UpdateOrderStatusHistory(ctx, orderID, models.OrderStatusAwaitingPayment); err != nil {
 		return err
 	}
 

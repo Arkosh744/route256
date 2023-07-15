@@ -48,6 +48,9 @@ type Repository interface {
 	InsertStock(ctx context.Context, item models.ReservationItem) error
 	UpdateStock(ctx context.Context, warehouseID int64, sku uint32, count uint64) error
 	DeleteStock(ctx context.Context, warehouseID int64, sku uint32) error
+
+	CreateOrderStatusHistory(ctx context.Context, user int64, orderId int64, status string) error
+	UpdateOrderStatusHistory(ctx context.Context, orderId int64, status string) error
 }
 
 type OrderStatusSender interface {
