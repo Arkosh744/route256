@@ -63,7 +63,7 @@ func (r *receiver) processMessages(ctx context.Context, pc sarama.PartitionConsu
 			message.Partition,
 			message.Offset)
 
-		//log.Println(messageText)
+		log.Println(messageText)
 
 		orderInt, err := strconv.ParseInt(orderID, 10, 64)
 		if err != nil {

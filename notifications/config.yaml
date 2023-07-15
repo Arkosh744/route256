@@ -32,4 +32,4 @@ jaeger:
   port: 6831
 
 log:
-  preset: "dev"
+  preset: "prod"
