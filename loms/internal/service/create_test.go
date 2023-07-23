@@ -32,12 +32,14 @@ func Test_service_Create(t *testing.T) {
 			name: "success",
 			repoMock: func(m *MockRepository) {
 				m.EXPECT().CreateOrder(ctx, userID).Return(int64(1), nil).Times(1)
+				m.EXPECT().CreateOrderStatusHistory(ctx, int64(1), int64(1), models.OrderStatusNew).Return(nil).Times(1)
 				m.EXPECT().GetStocks(ctx, items[0].SKU).Return(
 					[]models.StockItem{{WarehouseID: 1, Count: uint64(items[0].Count)}}, nil).Times(1)
 				m.EXPECT().CreateReservation(ctx, int64(1), int64(1), items[0].SKU, uint64(items[0].Count)).Return(nil).Times(1)
 				m.EXPECT().DeleteStock(ctx, int64(1), items[0].SKU).Return(nil).Times(1)
 				m.EXPECT().CreateOrderItems(ctx, int64(1), items).Return(nil).Times(1)
 				m.EXPECT().UpdateOrderStatus(ctx, int64(1), models.OrderStatusAwaitingPayment).Return(nil).Times(1)
+				m.EXPECT().UpdateOrderStatusHistory(ctx, int64(1), models.OrderStatusAwaitingPayment).Return(nil).Times(1)
 			},
 			txManagerMock: func(m *pg.MockTxManager) {
 				m.EXPECT().RunRepeatableRead(ctx, gomock.Any()).DoAndReturn(

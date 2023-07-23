@@ -115,8 +115,11 @@ services:
     ports:
       - "8082:8082"
       - "7082:7082"
+      - "50055:50055"
     networks:
       - service_network
+      - notifications_network
+      - loms_network
     deploy:
       restart_policy:
         condition: on-failure
@@ -137,6 +140,15 @@ services:
       - "/bin/sh"
       - "-c"
       - "/app 2>&1 | tee /log.txt"
+
+  notifications_redis:
+    image: redis:latest
+    networks:
+      - notifications_network
+    ports:
+      - "6666:6379"
+    volumes:
+      - notifications_redis_data:/data
 
   # kafka
   zookeeper:
@@ -290,10 +302,12 @@ services:
 networks:
   checkout_network:
   loms_network:
+  notifications_network:
   service_network:
 
 volumes:
   checkout_postgres_data:
   loms_postgres_data:
+  notifications_redis_data:
 
   grafana-data:

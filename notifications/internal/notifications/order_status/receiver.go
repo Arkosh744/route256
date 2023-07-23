@@ -1,8 +1,12 @@
 package order_status
 
 import (
+	"context"
 	"fmt"
 	"log"
+	"route256/notifications/internal/models"
+	"strconv"
+	"time"
 
 	"github.com/Shopify/sarama"
 )
@@ -12,7 +16,7 @@ type OrderStatusReceiver interface {
 }
 
 type MessageSender interface {
-	SendMessage(chatID int64, text string) error
+	SendMessage(ctx context.Context, tgMessage models.TelegramMessage) error
 }
 
 type receiver struct {
@@ -29,7 +33,7 @@ func NewReceiver(consumer sarama.Consumer, bot MessageSender, chatID int64) *rec
 	}
 }
 
-func (r *receiver) Subscribe(topic string) error {
+func (r *receiver) Subscribe(ctx context.Context, topic string) error {
 	partitionList, err := r.consumer.Partitions(topic)
 	if err != nil {
 		return err
@@ -41,13 +45,13 @@ func (r *receiver) Subscribe(topic string) error {
 			return err
 		}
 
-		go r.processMessages(pc, topic)
+		go r.processMessages(ctx, pc, topic)
 	}
 
 	return nil
 }
 
-func (r *receiver) processMessages(pc sarama.PartitionConsumer, topic string) {
+func (r *receiver) processMessages(ctx context.Context, pc sarama.PartitionConsumer, topic string) {
 	for message := range pc.Messages() {
 		orderID := string(message.Key)
 		status := string(message.Value)
@@ -61,7 +65,23 @@ func (r *receiver) processMessages(pc sarama.PartitionConsumer, topic string) {
 
 		log.Println(messageText)
 
-		if err := r.bot.SendMessage(r.chatID, messageText); err != nil {
+		orderInt, err := strconv.ParseInt(orderID, 10, 64)
+		if err != nil {
+			log.Printf("failed to convert orderID to int: %v", err)
+			continue
+		}
+
+		tgMessage := models.TelegramMessage{
+			OrderMessage: models.OrderMessage{
+				OrderID: orderInt,
+				Status:  status,
+				CreatedAt: time.Now(),
+			},
+			ChatID: r.chatID,
+			Text:   messageText,
+		}
+
+		if err := r.bot.SendMessage(ctx, tgMessage); err != nil {
 			log.Printf("failed to send message: %v", err)
 		}
 	}

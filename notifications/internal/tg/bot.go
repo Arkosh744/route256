@@ -1,33 +1,31 @@
 package tg
 
 import (
-	"log"
-
+	"context"
 	api "github.com/go-telegram-bot-api/telegram-bot-api"
+	"route256/notifications/internal/models"
 )
 
 type Bot struct {
-	*api.BotAPI
+	api   *api.BotAPI
+	repo  Repository
+	cache RedisCache
 }
 
-func NewBot(token string) (*Bot, error) {
+func NewBot(token string, repo Repository, cache RedisCache) (*Bot, error) {
 	bot, err := api.NewBotAPI(token)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Bot{bot}, nil
+	return &Bot{api: bot, repo: repo, cache: cache}, nil
 }
 
-func (b *Bot) SendMessage(chatID int64, text string) error {
-	msg := api.NewMessage(chatID, text)
+type Repository interface {
+	GetUserIDByOrderID(ctx context.Context, orderID int64) (int64, error)
+}
 
-	_, err := b.Send(msg)
-	if err != nil {
-		return err
-	}
-
-	log.Printf("sent to chat %d message: %s", chatID, text)
-
-	return nil
+type RedisCache interface {
+	Get(ctx context.Context, key string) (string, error)
+	AddToUserHistoryDay(ctx context.Context, msg models.OrderMessage) error
 }

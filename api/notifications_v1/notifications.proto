@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package route256.notifications;
+
+import "validate/validate.proto";
+
+option go_package = "route256/product-service/pkg/notifications_v1";
+
+service Notifications {
+  rpc ListUserHistoryDay(ListUserHistoryDayRequest) returns (ListUserHistoryDayResponse);
+}
+
+message ListUserHistoryDayRequest {
+  int64 user = 1 [(validate.rules).int64.gt = 0];
+}
+
+message ListUserHistoryDayResponse {
+  repeated Message messages = 1;
+}
+
+message Message {
+  int64 order_id = 1;
+  string status = 2;
+}

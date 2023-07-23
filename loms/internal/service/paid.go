@@ -53,6 +53,12 @@ func (s *service) payOrder(ctx context.Context, orderID int64) error {
 			return err
 		}
 
+		if err := s.repo.UpdateOrderStatusHistory(ctx, orderID, models.OrderStatusPaid); err != nil {
+			log.Error(ctx, fmt.Sprintf("failed to update order %d status history to 'canceled'", orderID), zap.Error(err))
+
+			return err
+		}
+
 		if err := s.repo.DeleteReservation(ctx, orderID); err != nil {
 			log.Error(ctx, fmt.Sprintf("failed to delete reservation for order %d", orderID), zap.Error(err))
 

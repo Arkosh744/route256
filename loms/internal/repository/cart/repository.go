@@ -2,6 +2,7 @@ package cart
 
 import (
 	"context"
+	"time"
 
 	"route256/libs/client/pg"
 	"route256/loms/internal/models"
@@ -23,6 +24,7 @@ const (
 	tableOrder       = "orders"
 	tableReservation = "reservations"
 	tableStock       = "stocks"
+	tableMsgHistory  = "msg_history"
 )
 
 //nolint:dupl //similar methods
@@ -199,6 +201,56 @@ func (r *repository) CreateOrder(ctx context.Context, user int64) (int64, error)
 	}
 
 	return orderId, nil
+}
+
+func (r *repository) CreateOrderStatusHistory(ctx context.Context, user int64, orderId int64, status string) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "Loms.Repo.CreateOrderStatusHistory")
+	defer span.Finish()
+
+	span.SetTag("user", user)
+	span.SetTag("orderID", orderId)
+
+	builder := sq.Insert(tableMsgHistory).
+		Columns("user_id", "order_id", "status", "created_at").
+		Values(user, orderId, status, time.Now()).
+		PlaceholderFormat(sq.Dollar)
+
+	query, v, err := builder.ToSql()
+	if err != nil {
+		return err
+	}
+
+	q := pg.Query{
+		Name:     "loms.CreateOrderStatusHistory",
+		QueryRaw: query,
+	}
+
+	if _, err := r.client.PG().ExecContext(ctx, q, v...); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *repository) UpdateOrderStatusHistory(ctx context.Context, orderId int64, status string) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "Loms.Repo.UpdateOrderStatusHistory")
+	defer span.Finish()
+
+	span.SetTag("orderID", orderId)
+
+	query :=`INSERT INTO msg_history (user_id, order_id, status, created_at) 
+			VALUES ((SELECT user_id FROM msg_history WHERE order_id = $1 LIMIT 1), $1, $2, $3)`
+
+	q := pg.Query{
+		Name:     "loms.UpdateOrderStatusHistory",
+		QueryRaw: query,
+	}
+
+	if _, err := r.client.PG().ExecContext(ctx, q, orderId, status, time.Now()); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (r *repository) CreateOrderItems(ctx context.Context, orderID int64, items []models.Item) error {
